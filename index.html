@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>軟體人情報站</title>
+<meta name="description" content="每 5 小時自動更新：彙整台灣與國際的軟體開發新聞、開源新星專案與職場討論。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E📡%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="brand">
+      <h1><span aria-hidden="true">📡</span> 軟體人情報站</h1>
+      <p class="sub">台灣與國際的軟體開發新聞、開源新星、職場討論，每 5 小時自動更新</p>
+    </div>
+    <p class="meta" id="meta" role="status" aria-live="polite">載入中…</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <nav class="tabs" id="tabs" role="tablist" aria-label="內容分類"></nav>
+  <div class="tools">
+    <input id="q" type="search" placeholder="搜尋標題…" aria-label="搜尋標題">
+    <select id="source" aria-label="依來源篩選"><option value="">所有來源</option></select>
+    <select id="sort" aria-label="排序">
+      <option value="hot">熱門排序</option>
+      <option value="new">最新優先</option>
+    </select>
+  </div>
+  <div class="chips" id="tags" role="group" aria-label="依主題篩選"></div>
+  <p class="count" id="count" aria-live="polite"></p>
+  <ol class="list" id="list"></ol>
+  <p class="empty" id="empty" hidden>沒有符合條件的內容。</p>
+  <details class="status" id="status"><summary>資料來源狀態</summary><ul id="status-list"></ul></details>
+</main>
+
+<footer class="wrap foot">
+  <p>內容版權屬於原網站，本站只彙整標題與連結。排序依各來源的分數／名次與發布時間計算，不經過任何 AI 改寫。
+  <a href="https://github.com/cornming/dev-intel">原始碼</a></p>
+</footer>
+<script src="assets/app.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+name: 更新情報並部署
+
+on:
+  schedule:
+    # 台北時間 00:00 / 05:00 / 10:00 / 15:00 / 20:00（UTC+8，沒有日光節約）
+    # 換算成 UTC：16:00（前一日）/ 21:00（前一日）/ 02:00 / 07:00 / 12:00
+    - cron: '0 2,7,12,16,21 * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths-ignore: ['data/**', 'README.md']
+
+concurrency:
+  group: update-and-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: 單元測試
+        run: npm test
+      - name: 抓取各來源
+        run: npm run build
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: 提交最新資料
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/latest.json
+          git diff --cached --quiet || git commit -m "chore(data): 更新情報 $(TZ=Asia/Taipei date '+%Y-%m-%d %H:%M') (台北)"
+          git push
+      - name: 整理要發布的檔案
+        run: |
+          mkdir _site
+          cp -r index.html assets data _site/
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deploy
+        uses: actions/deploy-pages@v4

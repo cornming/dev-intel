@@ -1,0 +1,13 @@
+{
+  "name": "dev-intel",
+  "version": "1.0.0",
+  "description": "軟體人情報站：每 5 小時自動彙整台灣與國際的軟體開發新聞、開源專案與職場討論",
+  "type": "module",
+  "private": true,
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "node --test \"test/*.test.mjs\""
+  },
+  "license": "MIT"
+}
