@@ -19,7 +19,9 @@
 | GitHub Blog | 官方消息 | RSS |
 | iThome | 台灣新聞 | RSS |
 | 科技新報 / TechOrange | 台灣新聞 | RSS（只保留命中主題標籤的文章） |
-| PTT Soft_Job | 職場討論 | Atom（排除回文與公告） |
+| DEV 職涯 / Lobsters 職場文化 | 職場討論 | 官方 API 的標籤分類（career／culture）；台灣媒體中命中「職場」主題的文章也會列入職場分頁 |
+
+> PTT Soft_Job 曾在清單中，但 PTT 會擋掉 GitHub 機房 IP（HTTP 403），已移除。
 
 ## 運作方式
 

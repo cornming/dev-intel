@@ -65,6 +65,29 @@ const devto = {
   },
 };
 
+// 職場類：用官方 API 的標籤分類取得（DEV 的 career、Lobsters 的 culture），歸類為 job
+const devtoCareer = {
+  name: 'DEV 職涯', weight: 0.8,
+  async fetch() {
+    const rows = await get('https://dev.to/api/articles?tag=career&top=7&per_page=20', { json: true });
+    return rows.map((r, i) => mk('DEV 職涯', 'global', 'job', {
+      title: r.title, url: r.url, score: r.positive_reactions_count, comments: r.comments_count,
+      discuss: r.url, time: r.published_at, extra: (r.tag_list || []).join(' '),
+    }, i));
+  },
+};
+
+const lobstersCulture = {
+  name: 'Lobsters 職場文化', weight: 0.8,
+  async fetch() {
+    const rows = await get('https://lobste.rs/t/culture.json', { json: true });
+    return rows.slice(0, 20).map((r, i) => mk('Lobsters 職場文化', 'global', 'job', {
+      title: r.title, url: r.url || r.comments_url, score: r.score, comments: r.comment_count,
+      discuss: r.comments_url, time: r.created_at, extra: (r.tags || []).join(' '),
+    }, i));
+  },
+};
+
 // 近 7 天新建立、星數最高的 repo（GitHub 沒有官方 trending API，這是常見替代做法）
 const githubRepos = {
   name: 'GitHub 新星專案', weight: 0.9,
@@ -100,11 +123,9 @@ function rssSource({ name, url, region = 'tw', kind = 'news', weight = 0.8, limi
 }
 
 export const SOURCES = [
-  hackerNews, lobsters, devto, githubRepos,
+  hackerNews, lobsters, devto, githubRepos, devtoCareer, lobstersCulture,
   rssSource({ name: 'iThome', url: 'https://www.ithome.com.tw/rss', weight: 1.0 }),
   rssSource({ name: 'TechNews 科技新報', url: 'https://technews.tw/feed/', weight: 0.8, limit: 40, needTag: true }),
   rssSource({ name: 'TechOrange', url: 'https://feeds.feedburner.com/TechOrange', weight: 0.7, needTag: true }),
   rssSource({ name: 'GitHub Blog', url: 'https://github.blog/feed/', region: 'global', weight: 0.7, limit: 10 }),
-  rssSource({ name: 'PTT Soft_Job', url: 'https://www.ptt.cc/atom/Soft_Job.xml', kind: 'job', weight: 0.8, limit: 30,
-    filter: (e) => !/^\s*Re:/i.test(e.title) && !/\[公告\]/.test(e.title) }),
 ];

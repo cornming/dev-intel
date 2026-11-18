@@ -3,10 +3,10 @@
 const SCHEDULE_HOURS = [0, 5, 10, 15, 20];
 const TABS = [
   { key: 'all', label: '全部', test: () => true },
-  { key: 'tw', label: '🇹🇼 台灣', test: (x) => x.region === 'tw' && x.kind !== 'job' },
-  { key: 'global', label: '🌍 國際', test: (x) => x.region === 'global' && x.kind === 'news' },
+  { key: 'tw', label: '🇹🇼 台灣', test: (x) => x.region === 'tw' },
+  { key: 'global', label: '🌍 國際', test: (x) => x.region === 'global' && x.kind === 'news' && !x.tags.includes('職場') },
   { key: 'repo', label: '⭐ 開源新星', test: (x) => x.kind === 'repo' },
-  { key: 'job', label: '💼 職場', test: (x) => x.kind === 'job' },
+  { key: 'job', label: '💼 職場', test: (x) => x.kind === 'job' || x.tags.includes('職場') },
 ];
 const $ = (id) => document.getElementById(id);
 const state = { data: null, tab: 'all', tag: '', source: '', sort: 'hot', q: '' };

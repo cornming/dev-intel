@@ -30,7 +30,9 @@ if (okCount === 0) {
 
 const weights = Object.fromEntries(SOURCES.map((s) => [s.name, s.weight]));
 const fresh = dedupe(results.flatMap((r) => r.items));
-const merged = mergeHistory(prev.items, fresh, now);
+// 已從來源清單移除的來源，其舊項目不再保留
+const known = new Set(SOURCES.map((s) => s.name));
+const merged = mergeHistory(prev.items.filter((x) => known.has(x.source)), fresh, now);
 const items = finalize(merged, weights, now).map(({ order, ...rest }) => rest);
 
 const out = {
