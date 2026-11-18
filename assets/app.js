@@ -57,7 +57,7 @@ function renderTabs() {
   for (const t of visibleTabs()) {
     const label = t.panel ? t.label : `${t.label} ${state.data.items.filter(t.test).length}`;
     const b = el('button', { type: 'button', role: 'tab', 'aria-selected': String(state.tab === t.key), text: label });
-    b.onclick = () => { state.tab = t.key; state.tag = ''; render(); };
+    b.onclick = () => { state.tab = t.key; state.tag = ''; commit(true); }; // 換頁籤：加入瀏覽歷史，返回鍵能回上一頁籤
     box.append(b);
   }
 }
@@ -68,7 +68,7 @@ function renderFilters(pool) {
   const box = $('tags'); box.replaceChildren();
   for (const [t, n] of [...tags].sort((a, b) => b[1] - a[1])) {
     const b = el('button', { type: 'button', 'aria-pressed': String(state.tag === t), text: `${t} ${n}` });
-    b.onclick = () => { state.tag = state.tag === t ? '' : t; render(); };
+    b.onclick = () => { state.tag = state.tag === t ? '' : t; commit(false); };
     box.append(b);
   }
   const sel = $('source'); const cur = state.source;
@@ -285,6 +285,7 @@ function render() {
   $('cards-ui').hidden = !!tab.panel; $('panel').hidden = !tab.panel;
   if (tab.panel) { $('panel').replaceChildren(tab.key === 'brief' ? renderBrief() : renderSecurity()); return; }
   const pool = state.data.items.filter(tab.test);
+  if (state.tag && !pool.some((x) => tagsOf(x).includes(state.tag))) state.tag = '';
   renderFilters(pool);
   const q = state.q.trim().toLowerCase();
   let list = pool.filter((x) => (!state.tag || tagsOf(x).includes(state.tag)) && (!state.source || x.source === state.source) && (!q || x.title.toLowerCase().includes(q)));
@@ -301,9 +302,28 @@ function render() {
   if (tr.on) runTranslateQueue();
 }
 
-$('q').addEventListener('input', (e) => { state.q = e.target.value; render(); });
-$('source').addEventListener('change', (e) => { state.source = e.target.value; render(); });
-$('sort').addEventListener('change', (e) => { state.sort = e.target.value; render(); });
+// ── 篩選狀態 ⇄ 網址 ──────────────────────────────────
+// 換頁籤用 pushState（返回鍵可回到上一個頁籤），其餘篩選用 replaceState（不會塞滿瀏覽歷史）。
+function currentUrl() { return location.pathname + UrlState.build(state) + location.hash; }
+function writeUrl(push) {
+  const url = currentUrl();
+  if (url === location.pathname + location.search + location.hash) return;
+  try { history[push ? 'pushState' : 'replaceState'](null, '', url); } catch { /* 沙盒或舊瀏覽器：略過，功能仍可用 */ }
+}
+function commit(push) { render(); writeUrl(push); }
+function applyUrl() {
+  Object.assign(state, UrlState.parse(location.search, visibleTabs().map((t) => t.key)));
+  $('q').value = state.q;
+  $('sort').value = state.sort;
+}
+let qTimer;
+$('q').addEventListener('input', (e) => {
+  state.q = e.target.value; render();
+  clearTimeout(qTimer); qTimer = setTimeout(() => writeUrl(false), 300); // 打字時不要每個字都改網址
+});
+$('source').addEventListener('change', (e) => { state.source = e.target.value; commit(false); });
+$('sort').addEventListener('change', (e) => { state.sort = e.target.value; commit(false); });
+window.addEventListener('popstate', () => { if (state.data) { applyUrl(); render(); } }); // 上一頁／下一頁
 
 const optionalJson = (url) => fetch(url, { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
 // AI 今日重點由「排程任務」發布到 claude/ai-analysis 分支（raw.githubusercontent.com 允許跨網域讀取）；
@@ -319,5 +339,5 @@ Promise.all([
   loadAnalysis(),
 ])
   .then(([d, analysis]) => { d.analysis = analysis && typeof analysis === 'object' ? analysis : null; return d; })
-  .then((d) => { state.data = d; render(); initTranslate(); setInterval(renderMeta, 60000); })
+  .then((d) => { state.data = d; applyUrl(); render(); writeUrl(false); initTranslate(); setInterval(renderMeta, 60000); })
   .catch(() => { $('meta').textContent = '資料載入失敗，請稍後再試。'; });
