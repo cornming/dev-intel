@@ -269,9 +269,12 @@
       const firstGl = its.find((x) => x.region !== 'tw'), firstTw = its.find((x) => x.region === 'tw');
       let lead = null;
       if (firstGl && firstTw) { const h = (D.timeOf(firstTw) - D.timeOf(firstGl)) / 36e5; lead = h >= 0 ? `國際（${firstGl.source}）先於台灣（${firstTw.source}）${h < 1 ? Math.round(h * 60) + ' 分鐘' : h.toFixed(1) + ' 小時'}` : `台灣（${firstTw.source}）先於國際（${firstGl.source}）${(-h).toFixed(1)} 小時`; }
+      // 產業標籤：AI 有填就用；沒填則由事件內文章已分類的產業推導（出現最多的前 2 個），更一致也不依賴 AI
+      const cnt = new Map(); for (const x of its) for (const i of x.inds || []) cnt.set(i, (cnt.get(i) || 0) + 1);
+      const evInds = (e.industries && e.industries.length ? e.industries : [...cnt.entries()].sort((a, b) => b[1] - a[1]).slice(0, 2).map(([i]) => i));
       c.append(el('div', { class: 'event' },
         el('h3', { text: e.name }), el('p', { class: 'esum', text: e.summary }),
-        el('div', { class: 'dchips' }, el('span', { class: 'pill', text: `${its.length} 篇` }), el('span', { class: 'pill', text: `${srcs.size} 個來源` }), el('span', { class: 'pill', text: `台灣 ${its.filter((x) => x.region === 'tw').length}／國際 ${its.filter((x) => x.region !== 'tw').length}` }), ...(e.industries || []).map((i) => el('span', { class: 'pill alt', text: indName[i] || i }))),
+        el('div', { class: 'dchips' }, el('span', { class: 'pill', text: `${its.length} 篇` }), el('span', { class: 'pill', text: `${srcs.size} 個來源` }), el('span', { class: 'pill', text: `台灣 ${its.filter((x) => x.region === 'tw').length}／國際 ${its.filter((x) => x.region !== 'tw').length}` }), ...evInds.map((i) => el('span', { class: 'pill alt', text: indName[i] || i }))),
         lead ? el('p', { class: 'dlead', text: lead }) : null,
         el('ol', { class: 'cites' }, ...its.slice(0, 4).map((x, i) => el('li', {}, el('span', { class: 'cn', text: `[${i + 1}]` }), el('a', { href: safeUrl(x.url), target: '_blank', rel: 'noopener noreferrer', text: x.title.split(' — ')[0] }), el('span', { class: 'dsrc', text: ` ・${x.source}・${fmtTime(D.timeOf(x))}` })))),
         its.length > 4 ? el('button', { type: 'button', class: 'linklike', text: `查看全部 ${its.length} 篇`, onclick: () => ev({ title: e.name, sub: e.summary, items: its, onChange }) }) : null));
