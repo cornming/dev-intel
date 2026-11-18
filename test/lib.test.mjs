@@ -21,10 +21,48 @@ test('normalizeUrl 移除追蹤參數、www、結尾斜線', () => {
   assert.equal(normalizeUrl('https://www.Example.com/a/?utm_source=x&id=2#top'), 'https://example.com/a?id=2');
 });
 
-test('tagsFor 不會把 maintain 當成 AI', () => {
-  assert.deepEqual(tagsFor('How to maintain a garden'), []);
-  assert.ok(tagsFor('OpenAI releases new LLM').includes('AI'));
-  assert.ok(tagsFor('iThome 資安漏洞通報').includes('資安'));
+test('tagsFor：預期命中的標籤（標題 → 必含標籤）', () => {
+  const cases = [
+    ['Java4Shell: RCE in OpenJDK when processing Base64', ['資安', '語言']],
+    ['jQuery 4.1.0', ['前端']],
+    ['Nimony: The next version of Nim', ['語言']],
+    ['My Emacs 31 contributions', ['開發工具']],
+    ['Redict is deprecated', ['後端']],
+    ['OpenAI releases new LLM', ['AI']],
+    ['Nvidia stopped disclosing Singapore sales as revenues hit $104B', ['硬體', '產業']],
+    ['輝達第三季營收年增達 103%，獲利年增翻倍', ['硬體', '產業']],
+    ['iThome 資安漏洞通報', ['資安']],
+    ['Tor匿名網路遭DDoS攻擊，官方緊急更新IPv6防禦機制', ['資安']],
+    ['Redshift支援Iceberg資料表多陳述式交易', ['雲端', '後端']],
+    ['美國多家銀行App傳出服務異常，內部系統軟體臭蟲造成交易延遲', ['行動', '開發工具']],
+    ['我的面試心得與薪資談判', ['職場']],
+    ['Software engineer layoffs and the job market in 2026', ['職場']],
+    ['Apple調整macOS App權限管理', ['系統', '行動']],
+    ['Qwen4-Max 任務成本降約六成', ['AI']],
+    ['You won\'t win at copyright', ['政策']],
+  ];
+  for (const [title, expect] of cases) {
+    const got = tagsFor(title);
+    for (const tag of expect) assert.ok(got.includes(tag), `「${title}」應含 ${tag}，實際 [${got}]`);
+  }
+});
+
+test('tagsFor：避免常見誤判', () => {
+  const none = [
+    'How to maintain a garden',          // maintain 不是 AI
+    'Steve Jobs Core Animation demo',     // Jobs 不是職場
+    'Schedule a cron job nightly',        // cron job 不是職場
+    '提升叢集工作負載的穩定度',            // 工作負載不是職場
+    'Let\'s go to the beach',             // go 不是 Go 語言
+    '驊陞部分資訊系統遭攻擊，核心系統未受影響', // 核心系統不是 kernel
+  ];
+  for (const title of none) {
+    const got = tagsFor(title);
+    assert.ok(!got.includes('AI') && !got.includes('職場') && !got.includes('語言'), `「${title}」不該被誤判，實際 [${got}]`);
+  }
+  assert.ok(!tagsFor('Apple earnings beat estimates').includes('行動'), 'Apple 不是 App');
+  assert.ok(!tagsFor('核心系統未受影響').includes('系統'), '核心系統不是系統標籤');
+  assert.ok(tagsFor('a'.repeat(5) + ' AI LLM aws react python android linux git nvidia').length <= 3, '最多 3 個標籤');
 });
 
 test('decodeEntities 處理數字實體且不爆掉', () => {

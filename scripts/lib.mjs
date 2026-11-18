@@ -58,17 +58,25 @@ export function normalizeUrl(raw) {
 
 export const idFor = (url) => createHash('sha1').update(normalizeUrl(url)).digest('hex').slice(0, 12);
 
-// 關鍵字 → 主題標籤（大小寫不分；英文用單字邊界，避免 "ai" 命中 "maintain"）
+// 關鍵字 → 主題標籤（大小寫不分）。
+// 英文一律用單字邊界 \b，避免 "ai" 命中 "maintain"；中文則直接比對詞。
+// 順序＝優先順序：每則最多保留 3 個標籤，排前面的先保留。
+// 刻意避免太籠統的詞（例如「工作」會誤中「工作負載」、"job" 會誤中 cron job）。
 const TAG_RULES = [
-  ['AI', /\b(ai|llm|gpt|claude|gemini|openai|anthropic|copilot|agent|agents|machine learning|deep learning|diffusion|rag|mcp)\b|人工智慧|大型語言模型|生成式|AI代理|智慧體/i],
-  ['資安', /\b(security|vulnerabilit\w*|cve-\d+|exploit|malware|ransomware|breach|zero-day|phishing|supply chain attack)\b|資安|漏洞|駭客|惡意程式|勒索|外洩|釣魚/i],
-  ['雲端', /\b(aws|azure|gcp|cloud|kubernetes|k8s|docker|serverless|terraform|devops|ci\/cd|sre)\b|雲端|容器/i],
-  ['前端', /\b(javascript|typescript|react|vue|svelte|angular|css|html|frontend|front-end|browser|webassembly|wasm|node\.?js|deno|bun|next\.?js)\b|前端|瀏覽器/i],
-  ['後端', /\b(backend|api|database|postgres\w*|mysql|sqlite|redis|kafka|microservices?|sql|graphql)\b|資料庫|後端/i],
-  ['語言', /\b(rust|golang|go|python|java|kotlin|swift|c\+\+|c#|\.net|zig|php|ruby|elixir|haskell|lua)\b/i],
-  ['行動', /\b(android|ios|flutter|react native|mobile|swiftui|jetpack)\b|行動應用|手機/i],
-  ['開源', /\b(open[- ]source|oss|foss|github|gitlab|linux|license|maintainer)\b|開源|開放原始碼/i],
-  ['職場', /\b(career|hiring|layoffs?|salary|interview|remote work|burnout|job)\b|面試|薪水|薪資|轉職|求職|裁員|工作|職涯|心得|職缺|offer/i],
+  ['AI', /\b(ai|a\.i\.|llm|llms|gpt[\w-]*|claude|gemini|openai|anthropic|copilot|chatgpt|agentic|agents?|machine learning|deep learning|neural|diffusion|rag|mcp|qwen\d*|deepseek|llama|mistral|grok|prompts?|inference|fine-?tun\w*)\b|人工智慧|大型語言模型|生成式|AI ?代理|智慧體|大模型|機器學習|深度學習/i],
+  ['職場', /\b(careers?|hiring|layoffs?|salary|salaries|interviews?|resume|burnout|job (search|market|hunt|offer|interview)|remote work|promotion|onboarding|offers?)\b|面試|薪水|薪資|轉職|求職|裁員|資遣|職涯|職缺|工作機會|找工作|離職|加班|上班族/i],
+  ['資安', /\b(security|vulnerabilit\w*|cves?(-\d+)?|exploits?|rce|malware|ransomware|breach(es)?|zero-?days?|phishing|ddos|backdoor|cyber\w*|privacy|encryption|supply chain attack|phrack|tor)\b|資安|漏洞|駭客|惡意程式|勒索|外洩|釣魚|網路攻擊|資料遭|遭駭|隱私|加密/i],
+  ['雲端', /\b(aws|azure|gcp|cloud\w*|kubernetes|k8s|docker|containers?|serverless|terraform|devops|ci\/cd|sre|redshift|datacenters?)\b|雲端|容器|資料中心/i],
+  ['前端', /\b(javascript|typescript|js|ts|react|vue|svelte|solid(\.?js)?|angular|jquery|htmx|tailwind|vite|webpack|css|html|frontend|front-end|browsers?|chrome|firefox|safari|webassembly|wasm|node\.?js|deno|bun|next\.?js)\b|前端|瀏覽器/i],
+  ['後端', /\b(backend|back-end|apis?|databases?|postgres\w*|mysql|mariadb|sqlite|mongodb|redis|redict|kafka|microservices?|sql|graphql|iceberg|data (lake|warehouse))\b|資料庫|後端|資料倉儲/i],
+  ['語言', /\b(rust|golang|python|java|kotlin|swift|c\+\+|c#|\.net|zig|php|ruby|elixir|haskell|lua|nim|nimony|ocaml|scala|clojure|perl|lisp|compilers?|programming languages?)\b|\bgo (1\.\d+|modules?|routines?)\b|\bin go\b|\bc (language|standard|23|26)\b|\bc’s\b|java\d\w*|程式語言|編譯器/i],
+  ['行動', /\b(android|ios|ipados|flutter|react native|mobile|swiftui|jetpack|apps?)\b|行動應用|手機/i],
+  ['系統', /\b(windows|macos|linux|ubuntu|debian|kernel|bsd|firmware|operating systems?|unix)\b|作業系統|韌體/i],
+  ['開發工具', /\b(git|github|gitlab|vim|neovim|emacs|vscode|ide|editors?|cli|terminal|shell|debugg\w*|linters?|build systems?|package managers?|npm|pip|cargo|readme)\b|開發工具|開發者|程式碼|軟體臭蟲|\bbugs?\b/i],
+  ['開源', /\b(open[- ]source|oss|foss|licen[sc]es?|maintainers?|copyleft|gpl|hacktoberfest)\b|開源|開放原始碼/i],
+  ['硬體', /\b(nvidia|amd|intel|tsmc|chips?|semiconductors?|gpus?|cpus?|asic|fpga|robots?|robotics|drones?|iot|hardware|quantum)\b|輝達|晶片|半導體|台積電|機器人|無人機|伺服器|量子/i],
+  ['產業', /\b(revenues?|earnings|acquir\w*|acquisitions?|merger|ipo|valuation|funding|startups?|stocks?|antitrust|bitcoin|crypto\w*|blockchain)\b|營收|收購|併購|股價|目標價|財報|獲利|市值|募資|新創|比特幣|加密貨幣|區塊鏈/i],
+  ['政策', /\b(laws?|legal|lawsuits?|copyright|regulations?|bans?|gdpr|court|sues?|policy|government|congress|eu)\b|法規|法院|禁令|監管|法案|政府|出口管制|訴訟/i],
 ];
 
 export function tagsFor(text = '') {

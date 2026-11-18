@@ -29,6 +29,8 @@ function ago(iso) {
   if (m < 1440) return `${Math.floor(m / 60)} 小時前`;
   return `${Math.floor(m / 1440)} 天前`;
 }
+// 沒有命中任何主題的歸為「其他」，讓每一則都能被篩選到
+const tagsOf = (x) => (x.tags.length ? x.tags : ['其他']);
 const safeUrl = (u) => (/^https?:\/\//i.test(u) ? u : '#');
 function el(tag, props = {}, ...kids) {
   const n = document.createElement(tag);
@@ -56,7 +58,7 @@ function renderTabs() {
 
 function renderFilters(pool) {
   const tags = new Map();
-  for (const x of pool) for (const t of x.tags) tags.set(t, (tags.get(t) ?? 0) + 1);
+  for (const x of pool) for (const t of tagsOf(x)) tags.set(t, (tags.get(t) ?? 0) + 1);
   const box = $('tags'); box.replaceChildren();
   for (const [t, n] of [...tags].sort((a, b) => b[1] - a[1])) {
     const b = el('button', { type: 'button', 'aria-pressed': String(state.tag === t), text: `${t} ${n}` });
@@ -94,7 +96,7 @@ function render() {
   const pool = state.data.items.filter(tab.test);
   renderFilters(pool);
   const q = state.q.trim().toLowerCase();
-  let list = pool.filter((x) => (!state.tag || x.tags.includes(state.tag)) && (!state.source || x.source === state.source) && (!q || x.title.toLowerCase().includes(q)));
+  let list = pool.filter((x) => (!state.tag || tagsOf(x).includes(state.tag)) && (!state.source || x.source === state.source) && (!q || x.title.toLowerCase().includes(q)));
   list = [...list].sort(state.sort === 'new'
     ? (a, b) => Date.parse(b.time ?? b.firstSeen) - Date.parse(a.time ?? a.firstSeen)
     : (a, b) => b.hot - a.hot);

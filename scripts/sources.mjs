@@ -14,11 +14,17 @@ async function get(url, { json = false, headers = {} } = {}) {
   return json ? res.json() : res.text();
 }
 
+// 職場來源的項目一律帶「職場」標籤（排最前面），其餘依關鍵字規則
+function tagsOf(kind, text) {
+  const t = tagsFor(text);
+  return kind === 'job' ? ['職場', ...t.filter((x) => x !== '職場')].slice(0, 3) : t;
+}
+
 function mk(source, region, kind, o, order) {
   return {
     id: idFor(o.url), title: o.title, url: o.url, source, region, kind,
     score: o.score ?? 0, comments: o.comments ?? 0, discuss: o.discuss ?? null,
-    time: o.time ?? null, tags: tagsFor(`${o.title} ${o.extra ?? ''}`), order,
+    time: o.time ?? null, tags: tagsOf(kind, `${o.title} ${o.extra ?? ''}`), order,
   };
 }
 
