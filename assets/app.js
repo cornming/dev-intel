@@ -72,9 +72,37 @@ function renderFilters(pool) {
   state.source = sel.value;
 }
 
+const ICONS = { news: '📰', repo: '📦', job: '💼' };
+const registry = new Map(); // item id → { li, x }，翻譯結果回來時只更新那一張卡片
+const tr = { on: false, translator: null, gen: 0, cache: DevTranslate.loadCache() };
+
+// 依翻譯狀態畫出標題：翻譯後主標題是中文，原文縮小顯示在下方
+function paintTitle(id) {
+  const rec = registry.get(id);
+  if (!rec) return;
+  const { li, x } = rec;
+  const { head, text } = DevTranslate.splitTitle(x);
+  const zh = tr.on ? tr.cache.get(text) : null;
+  const shown = zh || text;
+  const link = li.querySelector('h2 a');
+  const desc = li.querySelector('.desc');
+  const orig = li.querySelector('.orig');
+  if (x.kind === 'repo') { link.textContent = head; if (desc) desc.textContent = shown; } else { link.textContent = shown; }
+  orig.textContent = zh ? text : '';
+  orig.hidden = !zh;
+}
+
+function mediaFor(x) {
+  const ph = () => el('div', { class: `ph ph-${x.kind}`, 'aria-hidden': 'true' }, el('span', { text: ICONS[x.kind] ?? '📰' }), el('small', { text: x.source }));
+  if (!x.image || !/^https:\/\//i.test(x.image)) return ph();
+  const img = el('img', { src: x.image, alt: '', loading: 'lazy', decoding: 'async', referrerpolicy: 'no-referrer' });
+  const fig = el('div', { class: 'media' }, img);
+  img.addEventListener('error', () => fig.replaceWith(ph())); // 圖片失效時退回預設封面
+  return fig;
+}
+
 function card(x) {
-  const [name, ...rest] = x.title.split(' — ');
-  const desc = x.kind === 'repo' ? rest.join(' — ') : '';
+  const { head, text } = DevTranslate.splitTitle(x);
   const info = el('div', { class: 'info' },
     el('span', { class: `src${x.region === 'tw' ? ' tw' : ''}`, text: x.source }),
     ...x.tags.map((t) => el('span', { class: 'tag', text: t })),
@@ -85,9 +113,92 @@ function card(x) {
     el('span', { text: ago(x.time ?? x.firstSeen) }),
     x.stale ? el('span', { class: 'stale', text: '（來源暫時無更新）' }) : null,
   );
-  return el('li', { class: 'item' },
-    el('h2', {}, el('a', { href: safeUrl(x.url), target: '_blank', rel: 'noopener noreferrer', text: name })),
-    desc ? el('p', { class: 'desc', text: desc }) : null, info);
+  const link = el('a', { href: safeUrl(x.url), target: '_blank', rel: 'noopener noreferrer', text: x.kind === 'repo' ? head : text });
+  const li = el('li', { class: 'card' },
+    el('a', { class: 'cover', href: safeUrl(x.url), target: '_blank', rel: 'noopener noreferrer', tabindex: '-1', 'aria-hidden': 'true' }, mediaFor(x)),
+    el('div', { class: 'body' },
+      el('h2', {}, link),
+      x.kind === 'repo' ? el('p', { class: 'desc', text }) : null,
+      el('p', { class: 'orig', lang: 'en', hidden: '' }),
+      info));
+  registry.set(x.id, { li, x });
+  return li;
+}
+
+// ── 翻譯 ──────────────────────────────────────────────
+function setTrStatus(msg) { $('tr-status').textContent = msg; }
+
+function paintAll() { for (const id of registry.keys()) paintTitle(id); }
+
+async function runTranslateQueue() {
+  if (!tr.on || !tr.translator) return;
+  const gen = ++tr.gen; // 換頁籤、篩選、關閉翻譯時，舊的佇列會在下一輪停止
+  const todo = [];
+  const seen = new Set();
+  for (const { x } of registry.values()) {
+    const { text } = DevTranslate.splitTitle(x);
+    if (DevTranslate.needsTranslation(text) && !tr.cache.has(text) && !seen.has(text)) { seen.add(text); todo.push({ id: x.id, text }); }
+  }
+  paintAll();
+  if (!todo.length) { setTrStatus('目前顯示的內容已全部翻譯（或本來就是中文）'); return; }
+  let n = 0;
+  for (const job of todo) {
+    if (gen !== tr.gen || !tr.on) return;
+    setTrStatus(`翻譯中 ${n}/${todo.length}…`);
+    try {
+      const zh = await tr.translator.translate(job.text);
+      if (zh) tr.cache.set(job.text, zh);
+    } catch (e) {
+      setTrStatus(`翻譯中斷：${e.message || e}`);
+      return;
+    }
+    n++;
+    // 同一句英文可能出現在多張卡片：全部更新
+    for (const [id, { x }] of registry) if (DevTranslate.splitTitle(x).text === job.text) paintTitle(id);
+  }
+  DevTranslate.saveCache(tr.cache);
+  if (gen === tr.gen) setTrStatus(`已翻譯 ${todo.length} 則（由瀏覽器本機完成）`);
+}
+
+async function enableTranslate() {
+  const btn = $('tr-btn');
+  btn.disabled = true;
+  try {
+    tr.translator ??= await DevTranslate.createTranslator((p) => setTrStatus(`下載翻譯模型 ${Math.round(p * 100)}%（第一次需要，之後不必再下載）`));
+    tr.on = true;
+    try { localStorage.setItem('devintel.tr', '1'); } catch { /* 略過 */ }
+    btn.setAttribute('aria-pressed', 'true');
+    btn.textContent = '🌐 顯示原文';
+    runTranslateQueue();
+  } catch (e) {
+    setTrStatus(String(e.message || e));
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function disableTranslate() {
+  tr.on = false; tr.gen++;
+  try { localStorage.setItem('devintel.tr', '0'); } catch { /* 略過 */ }
+  $('tr-btn').setAttribute('aria-pressed', 'false');
+  $('tr-btn').textContent = '🌐 翻成中文';
+  setTrStatus('');
+  paintAll();
+}
+
+async function initTranslate() {
+  const btn = $('tr-btn');
+  if (!DevTranslate.supported()) {
+    btn.disabled = true;
+    btn.title = '需要桌面版 Chrome 138 以上';
+    setTrStatus('內建翻譯需要桌面版 Chrome 138 以上（此瀏覽器不支援，仍可正常閱讀原文）');
+    return;
+  }
+  btn.onclick = () => (tr.on ? disableTranslate() : enableTranslate());
+  // 之前開過、且模型已下載好，就自動啟用（不需要再次下載，因此不必等使用者點擊）
+  let wanted = false;
+  try { wanted = localStorage.getItem('devintel.tr') === '1'; } catch { /* 略過 */ }
+  if (wanted && (await DevTranslate.availability()) === 'available') enableTranslate();
 }
 
 function render() {
@@ -100,11 +211,14 @@ function render() {
   list = [...list].sort(state.sort === 'new'
     ? (a, b) => Date.parse(b.time ?? b.firstSeen) - Date.parse(a.time ?? a.firstSeen)
     : (a, b) => b.hot - a.hot);
+  registry.clear();
   $('list').replaceChildren(...list.slice(0, 120).map(card));
   $('count').textContent = `共 ${list.length} 則${list.length > 120 ? '（顯示前 120 則）' : ''}`;
   $('empty').hidden = list.length > 0;
   $('status-list').replaceChildren(...state.data.sources.map((s) =>
     el('li', { class: s.ok ? '' : 'bad', text: `${s.ok ? '✓' : '✗'} ${s.name}：${s.ok ? s.count + ' 則' : `本輪抓取失敗${s.failStreak > 1 ? `（已連續 ${s.failStreak} 輪）` : ''}，沿用舊資料`}` })));
+  paintAll();
+  if (tr.on) runTranslateQueue();
 }
 
 $('q').addEventListener('input', (e) => { state.q = e.target.value; render(); });
@@ -113,5 +227,5 @@ $('sort').addEventListener('change', (e) => { state.sort = e.target.value; rende
 
 fetch('data/latest.json', { cache: 'no-cache' })
   .then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); })
-  .then((d) => { state.data = d; render(); setInterval(renderMeta, 60000); })
+  .then((d) => { state.data = d; render(); initTranslate(); setInterval(renderMeta, 60000); })
   .catch(() => { $('meta').textContent = '資料載入失敗，請稍後再試。'; });

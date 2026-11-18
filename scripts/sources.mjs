@@ -1,5 +1,5 @@
 // 各來源抓取器：每個都回傳統一格式的項目陣列，單一來源失敗不影響其他來源。
-import { parseFeed, idFor, tagsFor } from './lib.mjs';
+import { parseFeed, idFor, tagsFor, cleanImageUrl } from './lib.mjs';
 
 const UA = 'dev-intel/1.0 (+https://github.com/cornming/dev-intel)';
 const TIMEOUT_MS = 20000;
@@ -25,6 +25,7 @@ function mk(source, region, kind, o, order) {
     id: idFor(o.url), title: o.title, url: o.url, source, region, kind,
     score: o.score ?? 0, comments: o.comments ?? 0, discuss: o.discuss ?? null,
     time: o.time ?? null, tags: tagsOf(kind, `${o.title} ${o.extra ?? ''}`), order,
+    image: cleanImageUrl(o.image) ?? null,
   };
 }
 
@@ -66,7 +67,7 @@ const devto = {
     const rows = await get('https://dev.to/api/articles?top=1&per_page=30', { json: true });
     return rows.map((r, i) => mk('DEV', 'global', 'news', {
       title: r.title, url: r.url, score: r.positive_reactions_count, comments: r.comments_count,
-      discuss: r.url, time: r.published_at, extra: (r.tag_list || []).join(' '),
+      discuss: r.url, time: r.published_at, extra: (r.tag_list || []).join(' '), image: r.cover_image,
     }, i));
   },
 };
@@ -78,7 +79,7 @@ const devtoCareer = {
     const rows = await get('https://dev.to/api/articles?tag=career&top=7&per_page=20', { json: true });
     return rows.map((r, i) => mk('DEV 職涯', 'global', 'job', {
       title: r.title, url: r.url, score: r.positive_reactions_count, comments: r.comments_count,
-      discuss: r.url, time: r.published_at, extra: (r.tag_list || []).join(' '),
+      discuss: r.url, time: r.published_at, extra: (r.tag_list || []).join(' '), image: r.cover_image,
     }, i));
   },
 };
@@ -109,6 +110,8 @@ const githubRepos = {
         title: `${r.full_name}${r.description ? ' — ' + r.description : ''}`, url: r.html_url,
         score: r.stargazers_count, comments: r.forks_count, time: r.created_at,
         extra: `${r.language ?? ''} ${(r.topics || []).join(' ')}`,
+        // GitHub 官方產生的專案預覽卡（Social preview），不必另外抓頁面
+        image: `https://opengraph.githubassets.com/1/${r.full_name}`,
       }, i),
       lang: r.language ?? null,
     }));
@@ -122,7 +125,7 @@ function rssSource({ name, url, region = 'tw', kind = 'news', weight = 0.8, limi
     async fetch() {
       const xml = await get(url, { headers: { 'user-agent': 'Mozilla/5.0 (compatible; dev-intel/1.0)' } });
       return parseFeed(xml).filter((e) => (filter ? filter(e) : true)).slice(0, limit)
-        .map((e, i) => mk(name, region, kind, { title: e.title, url: e.link, time: e.time }, i))
+        .map((e, i) => mk(name, region, kind, { title: e.title, url: e.link, time: e.time, image: e.image }, i))
         .filter((x) => !needTag || x.tags.length > 0);
     },
   };

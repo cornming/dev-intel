@@ -33,6 +33,26 @@
 
 排名與主題規則都在 `scripts/lib.mjs`、來源清單與權重在 `scripts/sources.mjs`，要新增來源只要加一個 `rssSource({...})`。
 
+## 封面圖
+
+每則以卡片呈現。封面圖依序取得：來源自帶的圖（DEV 的 `cover_image`、RSS 的 `media:content`／`enclosure`／內文第一張圖、GitHub 專案的官方預覽圖）→ 沒有的才去抓文章頁的 `og:image`（`scripts/images.mjs`）。
+
+- 每篇文章只抓一次，結果（含「已查過但沒有圖」）存進資料，下一輪沿用；暫時性失敗最多重試 3 輪。
+- 每輪最多查 120 篇、上限 150 秒，排名高的優先；只讀頁面開頭到 `</head>`，最多 300 KB。
+- Hacker News／Lobsters 的連結是討論串，不抓。
+- 只收 https 圖片，排除追蹤像素與 gif；圖片以 `loading="lazy"`、`referrerpolicy="no-referrer"` 載入，失效時自動退回預設封面。
+- 圖片是第三方網站的，本站只引用連結、不儲存圖檔。
+
+## 中文化（Chrome 內建翻譯）
+
+按「🌐 翻成中文」會用瀏覽器內建的 [Translator API](https://developer.chrome.com/docs/ai/translator-api) 把英文標題翻成繁體中文（`zh-Hant`），**不需要任何金鑰，翻譯在讀者本機完成**，內容不會送到我們的伺服器。
+
+- 需要桌面版 Chrome 138 以上；不支援的瀏覽器按鈕會停用並說明，仍可正常閱讀原文。
+- 第一次使用會下載翻譯模型（頁面會顯示進度），之後不必再下載。
+- 已含中文的標題不翻；GitHub 專案名稱不翻、只翻說明；翻譯後原文以小字保留，方便對照。
+- 翻譯結果快取在瀏覽器的 localStorage，重新整理後不必重翻。
+- 機器翻譯偶爾會有不準確的地方，請以原文為準。
+
 ## 資料不進 git 歷史
 
 `data/latest.json` 每 5 小時就會變動一次（約 26 KB，壓縮後），若每次都提交，一年會多出約 1,800 個 commit。所以工作流程**不提交資料**：每輪開始時先從已部署的網站取回上一輪的 `latest.json`（`scripts/fetch-prev.mjs`），在它的基礎上更新，再直接部署。`data/latest.json` 已加入 `.gitignore`，不在 repo 內；若某輪取不到網站上的檔案，會從空資料重新開始（來源狀態與保留項目會重置，但網站內容仍會重新抓齊）。

@@ -4,6 +4,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { SOURCES } from './sources.mjs';
 import { dedupe, mergeHistory, finalize, nextStreaks } from './lib.mjs';
+import { enrichImages } from './images.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = resolve(ROOT, 'data/latest.json');
@@ -33,7 +34,11 @@ const fresh = dedupe(results.flatMap((r) => r.items));
 // 已從來源清單移除的來源，其舊項目不再保留
 const known = new Set(SOURCES.map((s) => s.name));
 const merged = mergeHistory(prev.items.filter((x) => known.has(x.source)), fresh, now);
-const items = finalize(merged, weights, now).map(({ order, ...rest }) => rest);
+const ranked = finalize(merged, weights, now);
+// 排名高的優先補封面圖；每篇只抓一次，結果存進資料沿用
+const imgStats = await enrichImages(ranked);
+console.log(`封面圖：本輪查 ${imgStats.done}/${imgStats.queued} 篇，找到 ${imgStats.found} 張（${imgStats.ms} ms）`);
+const items = ranked.map(({ order, ...rest }) => rest);
 
 const out = {
   generatedAt: new Date(now).toISOString(),

@@ -24,6 +24,51 @@ function tagContent(block, name) {
   return m ? m[1] : '';
 }
 
+// 只接受 https 圖片（網站是 https，http 圖片會被瀏覽器擋掉），並略過追蹤像素與 gif
+export function cleanImageUrl(raw, base) {
+  if (!raw) return null;
+  try {
+    const u = new URL(decodeEntities(String(raw).trim()), base);
+    if (u.protocol !== 'https:' || u.href.length > 600) return null;
+    if (/(feedburner|pixel|tracker|tracking|1x1|spacer)/i.test(u.href) || /\.gif($|\?)/i.test(u.pathname)) return null;
+    return u.href;
+  } catch {
+    return null;
+  }
+}
+
+// 從 RSS/Atom 的一個項目區塊找圖：media:content → media:thumbnail → enclosure → 內文第一張 <img>
+export function feedImage(block, base) {
+  const text = decodeEntities(block.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1'));
+  const pats = [
+    /<media:content[^>]*\burl=["']([^"']+)["']/i,
+    /<media:thumbnail[^>]*\burl=["']([^"']+)["']/i,
+    /<enclosure[^>]*\btype=["']image\/[^"']*["'][^>]*\burl=["']([^"']+)["']/i,
+    /<enclosure[^>]*\burl=["']([^"']+)["'][^>]*\btype=["']image\//i,
+    /<img[^>]*\bsrc=["']([^"']+)["']/i,
+  ];
+  for (const re of pats) {
+    const m = text.match(re);
+    const img = m && cleanImageUrl(m[1], base);
+    if (img) return img;
+  }
+  return null;
+}
+
+// 從文章頁面 HTML 取 og:image（屬性順序不固定，所以兩種順序都試）
+export function extractOgImage(html = '', baseUrl) {
+  const head = html.slice(0, 300000);
+  const keys = ['og:image:secure_url', 'og:image', 'twitter:image', 'twitter:image:src'];
+  for (const key of keys) {
+    const k = key.replace(/[:.]/g, '\\$&');
+    const a = head.match(new RegExp(`<meta[^>]+(?:property|name)=["']${k}["'][^>]*\\bcontent=["']([^"']+)["']`, 'i'));
+    const b = head.match(new RegExp(`<meta[^>]+\\bcontent=["']([^"']+)["'][^>]*(?:property|name)=["']${k}["']`, 'i'));
+    const img = cleanImageUrl((a ?? b)?.[1], baseUrl);
+    if (img) return img;
+  }
+  return null;
+}
+
 // 同時支援 RSS 2.0 (<item>) 與 Atom (<entry>)
 export function parseFeed(xml = '') {
   const blocks = xml.match(/<(item|entry)[\s>][\s\S]*?<\/\1>/gi) ?? [];
@@ -36,7 +81,7 @@ export function parseFeed(xml = '') {
     }
     const date = cleanText(tagContent(b, 'pubDate') || tagContent(b, 'published') || tagContent(b, 'updated') || tagContent(b, 'dc:date'));
     const t = Date.parse(date);
-    return { title, link, time: Number.isNaN(t) ? null : new Date(t).toISOString() };
+    return { title, link, time: Number.isNaN(t) ? null : new Date(t).toISOString(), image: feedImage(b, link) };
   }).filter((x) => x.title && /^https?:\/\//.test(x.link));
 }
 
@@ -124,7 +169,15 @@ export function mergeHistory(prev = [], fresh = [], now = Date.now(), ttlMs = 72
   const nowIso = new Date(now).toISOString();
   const prevById = new Map(prev.map((x) => [x.id, x]));
   const freshIds = new Set(fresh.map((x) => x.id));
-  const merged = fresh.map((x) => ({ ...x, firstSeen: prevById.get(x.id)?.firstSeen ?? nowIso, stale: false }));
+  const merged = fresh.map((x) => {
+    const old = prevById.get(x.id);
+    return {
+      ...x, firstSeen: old?.firstSeen ?? nowIso, stale: false,
+      // 圖片只抓一次：沿用上一輪的結果（含「已查過但沒有圖」）
+      image: x.image ?? old?.image ?? null,
+      imgChecked: !!(x.image || old?.imgChecked),
+    };
+  });
   for (const old of prev) {
     if (freshIds.has(old.id)) continue;
     if (now - Date.parse(old.firstSeen ?? nowIso) > ttlMs) continue;

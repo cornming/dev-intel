@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseFeed, normalizeUrl, tagsFor, dedupe, mergeHistory, finalize, decodeEntities, diversify, nextStreaks, unhealthy, isValidSnapshot } from '../scripts/lib.mjs';
+import { parseFeed, normalizeUrl, tagsFor, dedupe, mergeHistory, finalize, decodeEntities, diversify, nextStreaks, unhealthy, isValidSnapshot, cleanImageUrl, feedImage, extractOgImage } from '../scripts/lib.mjs';
 
 test('parseFeed 解析 RSS（含 CDATA 與實體）', () => {
   const xml = `<rss><channel><item><title><![CDATA[Rust &amp; Go]]></title><link>https://a.com/1</link><pubDate>Mon, 17 Nov 2026 08:00:00 GMT</pubDate></item></channel></rss>`;
@@ -140,4 +140,42 @@ test('isValidSnapshot：接受正常快照，拒絕壞資料', () => {
   assert.equal(isValidSnapshot({ items: 'x' }), false);
   assert.equal(isValidSnapshot({ items: [{ id: 1, url: 'u' }] }), false);
   assert.equal(isValidSnapshot({ items: [], sources: {} }), false);
+});
+
+test('cleanImageUrl：只收 https，排除追蹤像素與 gif，並能解析相對網址', () => {
+  assert.equal(cleanImageUrl('https://a.com/x.jpg'), 'https://a.com/x.jpg');
+  assert.equal(cleanImageUrl('/img/x.png', 'https://a.com/post/1'), 'https://a.com/img/x.png');
+  assert.equal(cleanImageUrl('http://a.com/x.jpg'), null);
+  assert.equal(cleanImageUrl('javascript:alert(1)'), null);
+  assert.equal(cleanImageUrl('data:image/png;base64,AAAA'), null);
+  assert.equal(cleanImageUrl('https://a.com/spinner.gif'), null);
+  assert.equal(cleanImageUrl('https://feeds.feedburner.com/~r/x/1.gif'), null);
+  assert.equal(cleanImageUrl(null), null);
+});
+
+test('feedImage：依序找 media:content、enclosure、內文 <img>（含實體編碼與 CDATA）', () => {
+  assert.equal(feedImage('<item><media:content url="https://a.com/m.jpg" medium="image"/></item>'), 'https://a.com/m.jpg');
+  assert.equal(feedImage('<item><enclosure url="https://a.com/e.jpg" type="image/jpeg" length="1"/></item>'), 'https://a.com/e.jpg');
+  assert.equal(feedImage('<item><enclosure type="image/png" url="https://a.com/e2.png"/></item>'), 'https://a.com/e2.png');
+  assert.equal(feedImage('<item><description><![CDATA[<p><img src="https://a.com/i.webp" width="9"></p>]]></description></item>'), 'https://a.com/i.webp');
+  assert.equal(feedImage('<item><description>&lt;img src=&quot;https://a.com/enc.jpg&quot;&gt;</description></item>'), 'https://a.com/enc.jpg');
+  assert.equal(feedImage('<item><description>純文字</description></item>'), null);
+});
+
+test('extractOgImage：兩種屬性順序都能解析，缺 og 時退回 twitter:image', () => {
+  assert.equal(extractOgImage('<head><meta property="og:image" content="https://a.com/1.jpg"></head>'), 'https://a.com/1.jpg');
+  assert.equal(extractOgImage('<head><meta content="https://a.com/2.jpg" property="og:image" /></head>'), 'https://a.com/2.jpg');
+  assert.equal(extractOgImage('<head><meta name="twitter:image" content="/t.jpg"></head>', 'https://a.com/p'), 'https://a.com/t.jpg');
+  assert.equal(extractOgImage('<head><meta property="og:image" content="http://a.com/insecure.jpg"></head>'), null);
+  assert.equal(extractOgImage('<head><title>x</title></head>'), null);
+});
+
+test('mergeHistory：沿用上一輪已抓到的封面圖與「已查過」狀態', () => {
+  const now = Date.parse('2026-11-18T00:00:00Z');
+  const prev = [{ id: 'a', firstSeen: '2026-11-17T00:00:00Z', image: 'https://a.com/1.jpg', imgChecked: true }, { id: 'b', firstSeen: '2026-11-17T00:00:00Z', image: null, imgChecked: true }];
+  const out = mergeHistory(prev, [{ id: 'a', image: null }, { id: 'b', image: null }, { id: 'c', image: null }], now);
+  const by = Object.fromEntries(out.map((x) => [x.id, x]));
+  assert.equal(by.a.image, 'https://a.com/1.jpg');
+  assert.equal(by.b.imgChecked, true);
+  assert.equal(by.c.imgChecked, false);
 });
