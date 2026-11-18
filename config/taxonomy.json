@@ -1,0 +1,1137 @@
+{
+  "version": 1,
+  "note": "產業分類與公司字典（可維護）。keywords／aliases：純英文詞比對時兩側需有邊界，含中文的詞直接比對，以 're:' 開頭的是原始正規表示式（用來排除中文子字串誤判，例如 筆電 不該命中 萬筆電子郵件）。公司的第一個產業是主要產業（2 分），其餘 1 分；keywords 每個命中 1 分（最多 3）；對應的主題標籤 1 分（標籤一律由標題重算，不採用來源自帶的標籤）；每則最多保留 2 個產業。",
+  "industries": [
+    {
+      "id": "semi",
+      "name": "半導體與硬體",
+      "tags": [
+        "硬體"
+      ],
+      "keywords": [
+        "半導體",
+        "晶片",
+        "晶圓",
+        "封裝",
+        "先進製程",
+        "euv",
+        "hbm",
+        "gpu",
+        "cpu",
+        "fpga",
+        "asic",
+        "chip",
+        "chips",
+        "semiconductor",
+        "foundry",
+        "晶片設計",
+        "記憶體",
+        "dram",
+        "nand",
+        "risc-v",
+        "製程",
+        "光模組",
+        "算力"
+      ]
+    },
+    {
+      "id": "cloud",
+      "name": "雲端與基礎設施",
+      "tags": [
+        "雲端"
+      ],
+      "keywords": [
+        "雲端",
+        "資料中心",
+        "data center",
+        "datacenter",
+        "kubernetes",
+        "k8s",
+        "docker",
+        "serverless",
+        "devops",
+        "cdn",
+        "基礎設施",
+        "伺服器",
+        "server",
+        "iac",
+        "terraform",
+        "cloud",
+        "hyperscaler",
+        "算力租賃"
+      ]
+    },
+    {
+      "id": "ai",
+      "name": "AI 與機器學習",
+      "tags": [
+        "AI"
+      ],
+      "keywords": [
+        "人工智慧",
+        "大模型",
+        "生成式",
+        "語言模型",
+        "機器學習",
+        "深度學習",
+        "llm",
+        "chatgpt",
+        "agent",
+        "agents",
+        "ai 代理",
+        "大型語言模型",
+        "推論",
+        "訓練",
+        "token"
+      ]
+    },
+    {
+      "id": "sec",
+      "name": "資安",
+      "tags": [
+        "資安"
+      ],
+      "keywords": [
+        "資安",
+        "漏洞",
+        "駭客",
+        "勒索",
+        "外洩",
+        "釣魚",
+        "惡意程式",
+        "零時差",
+        "cve",
+        "ransomware",
+        "malware",
+        "breach",
+        "phishing",
+        "zero-day",
+        "supply chain attack",
+        "供應鏈攻擊"
+      ]
+    },
+    {
+      "id": "dev",
+      "name": "軟體與開發者生態",
+      "tags": [
+        "語言",
+        "前端",
+        "後端",
+        "開發工具",
+        "開源",
+        "系統",
+        "行動"
+      ],
+      "keywords": [
+        "開源",
+        "open source",
+        "開發者",
+        "developer",
+        "程式碼",
+        "framework",
+        "框架",
+        "sdk",
+        "api",
+        "編譯器",
+        "compiler",
+        "套件",
+        "package"
+      ]
+    },
+    {
+      "id": "fin",
+      "name": "金融科技與加密貨幣",
+      "tags": [],
+      "keywords": [
+        "金融",
+        "銀行",
+        "bank",
+        "支付",
+        "payment",
+        "fintech",
+        "信用卡",
+        "證券",
+        "保險",
+        "比特幣",
+        "bitcoin",
+        "加密貨幣",
+        "crypto",
+        "區塊鏈",
+        "blockchain",
+        "ipo",
+        "投資",
+        "基金",
+        "央行",
+        "融資",
+        "stablecoin",
+        "穩定幣",
+        "defi"
+      ]
+    },
+    {
+      "id": "ecom",
+      "name": "電商與零售",
+      "tags": [],
+      "keywords": [
+        "電商",
+        "e-commerce",
+        "ecommerce",
+        "零售",
+        "retail",
+        "購物",
+        "蝦皮",
+        "momo",
+        "pchome",
+        "品牌",
+        "行銷",
+        "marketplace",
+        "聯盟行銷",
+        "商品"
+      ]
+    },
+    {
+      "id": "media",
+      "name": "社群與媒體",
+      "tags": [],
+      "keywords": [
+        "社群",
+        "媒體",
+        "串流",
+        "streaming",
+        "廣告",
+        "內容創作",
+        "創作者",
+        "新聞",
+        "搜尋引擎",
+        "搜尋流量",
+        "search traffic",
+        "出版",
+        "短影音",
+        "直播",
+        "podcast",
+        "影音"
+      ]
+    },
+    {
+      "id": "auto",
+      "name": "汽車與交通",
+      "tags": [],
+      "keywords": [
+        "汽車",
+        "電動車",
+        "自駕",
+        "自動駕駛",
+        "robotaxi",
+        "車用",
+        "交通",
+        "航空",
+        "鐵路",
+        "ev",
+        "autonomous",
+        "超級工廠",
+        "gigafactory",
+        "無人車",
+        "共享"
+      ]
+    },
+    {
+      "id": "mfg",
+      "name": "製造與供應鏈",
+      "tags": [],
+      "keywords": [
+        "製造",
+        "工廠",
+        "供應鏈",
+        "製程",
+        "mes",
+        "工業",
+        "自動化",
+        "機器人",
+        "robot",
+        "robotics",
+        "supply chain",
+        "odm",
+        "oem",
+        "代工",
+        "產線",
+        "良率",
+        "工控",
+        "無人機",
+        "物流",
+        "logistics",
+        "快遞"
+      ]
+    },
+    {
+      "id": "telco",
+      "name": "電信與網路",
+      "tags": [
+        "網路"
+      ],
+      "keywords": [
+        "電信",
+        "5g",
+        "6g",
+        "telecom",
+        "寬頻",
+        "衛星",
+        "starlink",
+        "基地台",
+        "通訊",
+        "頻譜",
+        "isp",
+        "光通訊",
+        "光纖",
+        "網通"
+      ]
+    },
+    {
+      "id": "game",
+      "name": "遊戲與娛樂",
+      "tags": [],
+      "keywords": [
+        "遊戲",
+        "game",
+        "games",
+        "gaming",
+        "電競",
+        "steam",
+        "minecraft",
+        "主機",
+        "電玩",
+        "hackathon"
+      ]
+    },
+    {
+      "id": "health",
+      "name": "醫療與生技",
+      "tags": [],
+      "keywords": [
+        "醫療",
+        "生技",
+        "醫院",
+        "藥",
+        "fda",
+        "基因",
+        "biotech",
+        "healthcare",
+        "醫材",
+        "健康",
+        "臨床",
+        "疾病"
+      ]
+    },
+    {
+      "id": "energy",
+      "name": "能源與環境",
+      "tags": [],
+      "keywords": [
+        "能源",
+        "電力",
+        "太陽能",
+        "solar",
+        "電池",
+        "battery",
+        "儲能",
+        "碳",
+        "氫能",
+        "核能",
+        "綠能",
+        "減碳",
+        "energy",
+        "核電",
+        "電網"
+      ]
+    },
+    {
+      "id": "gov",
+      "name": "政府與法規",
+      "tags": [
+        "政策"
+      ],
+      "keywords": [
+        "政府",
+        "法規",
+        "法案",
+        "禁令",
+        "出口管制",
+        "反壟斷",
+        "監管",
+        "國安",
+        "制裁",
+        "關稅",
+        "立法",
+        "regulation",
+        "antitrust",
+        "sanction",
+        "export control",
+        "national security",
+        "起訴",
+        "訴訟",
+        "lawsuit",
+        "出口",
+        "irs",
+        "國稅",
+        "稅務",
+        "export"
+      ]
+    },
+    {
+      "id": "device",
+      "name": "消費電子與裝置",
+      "tags": [],
+      "keywords": [
+        "手機",
+        "智慧型手機",
+        "穿戴",
+        "re:筆電(?!子)",
+        "平板",
+        "耳機",
+        "smartphone",
+        "wearable",
+        "laptop",
+        "iphone",
+        "ipad",
+        "顯示器",
+        "面板",
+        "螢幕",
+        "e ink",
+        "電子紙",
+        "鍵盤",
+        "滑鼠"
+      ]
+    },
+    {
+      "id": "talent",
+      "name": "教育與人才",
+      "tags": [
+        "職場"
+      ],
+      "keywords": [
+        "教育",
+        "大學",
+        "課程",
+        "培訓",
+        "人才",
+        "學習",
+        "bootcamp",
+        "education",
+        "university",
+        "course",
+        "求職",
+        "裁員",
+        "面試"
+      ]
+    }
+  ],
+  "entities": [
+    {
+      "id": "nvidia",
+      "name": "Nvidia／輝達",
+      "industries": [
+        "semi",
+        "ai"
+      ],
+      "aliases": [
+        "nvidia",
+        "輝達",
+        "黃仁勳",
+        "jensen huang",
+        "cuda",
+        "rubin",
+        "blackwell"
+      ]
+    },
+    {
+      "id": "tsmc",
+      "name": "台積電 TSMC",
+      "industries": [
+        "semi"
+      ],
+      "aliases": [
+        "tsmc",
+        "台積電"
+      ]
+    },
+    {
+      "id": "intel",
+      "name": "Intel",
+      "industries": [
+        "semi"
+      ],
+      "aliases": [
+        "intel",
+        "英特爾"
+      ]
+    },
+    {
+      "id": "amd",
+      "name": "AMD",
+      "industries": [
+        "semi"
+      ],
+      "aliases": [
+        "amd",
+        "超微"
+      ]
+    },
+    {
+      "id": "qualcomm",
+      "name": "Qualcomm／高通",
+      "industries": [
+        "semi",
+        "device"
+      ],
+      "aliases": [
+        "qualcomm",
+        "高通",
+        "snapdragon"
+      ]
+    },
+    {
+      "id": "mediatek",
+      "name": "聯發科",
+      "industries": [
+        "semi"
+      ],
+      "aliases": [
+        "mediatek",
+        "聯發科"
+      ]
+    },
+    {
+      "id": "samsung",
+      "name": "Samsung／三星",
+      "industries": [
+        "semi",
+        "device"
+      ],
+      "aliases": [
+        "samsung",
+        "三星"
+      ]
+    },
+    {
+      "id": "skhynix",
+      "name": "SK 海力士",
+      "industries": [
+        "semi"
+      ],
+      "aliases": [
+        "sk hynix",
+        "sk 海力士",
+        "海力士"
+      ]
+    },
+    {
+      "id": "micron",
+      "name": "Micron／美光",
+      "industries": [
+        "semi"
+      ],
+      "aliases": [
+        "micron",
+        "美光"
+      ]
+    },
+    {
+      "id": "asml",
+      "name": "ASML",
+      "industries": [
+        "semi"
+      ],
+      "aliases": [
+        "asml",
+        "艾司摩爾"
+      ]
+    },
+    {
+      "id": "umc",
+      "name": "聯電",
+      "industries": [
+        "semi"
+      ],
+      "aliases": [
+        "聯電"
+      ]
+    },
+    {
+      "id": "ase",
+      "name": "日月光",
+      "industries": [
+        "semi"
+      ],
+      "aliases": [
+        "日月光"
+      ]
+    },
+    {
+      "id": "microsoft",
+      "name": "Microsoft／微軟",
+      "industries": [
+        "cloud",
+        "dev"
+      ],
+      "aliases": [
+        "microsoft",
+        "微軟",
+        "azure",
+        "windows",
+        "outlook",
+        "copilot",
+        "microsoft 365",
+        "m365",
+        "visual studio",
+        "vs code",
+        ".net",
+        "xbox"
+      ]
+    },
+    {
+      "id": "github",
+      "name": "GitHub",
+      "industries": [
+        "dev"
+      ],
+      "aliases": [
+        "github"
+      ]
+    },
+    {
+      "id": "google",
+      "name": "Google",
+      "industries": [
+        "ai",
+        "cloud",
+        "media"
+      ],
+      "aliases": [
+        "google",
+        "alphabet",
+        "gemini",
+        "chrome",
+        "android",
+        "youtube",
+        "谷歌",
+        "waymo"
+      ]
+    },
+    {
+      "id": "apple",
+      "name": "Apple",
+      "industries": [
+        "device"
+      ],
+      "aliases": [
+        "apple",
+        "蘋果",
+        "iphone",
+        "ipad",
+        "macos",
+        "ios",
+        "icloud",
+        "app store"
+      ]
+    },
+    {
+      "id": "openai",
+      "name": "OpenAI",
+      "industries": [
+        "ai"
+      ],
+      "aliases": [
+        "openai",
+        "chatgpt",
+        "gpt-",
+        "gpt‑",
+        "sora"
+      ]
+    },
+    {
+      "id": "anthropic",
+      "name": "Anthropic／Claude",
+      "industries": [
+        "ai"
+      ],
+      "aliases": [
+        "anthropic",
+        "claude"
+      ]
+    },
+    {
+      "id": "deepseek",
+      "name": "DeepSeek",
+      "industries": [
+        "ai"
+      ],
+      "aliases": [
+        "deepseek"
+      ]
+    },
+    {
+      "id": "xai",
+      "name": "xAI／Grok",
+      "industries": [
+        "ai"
+      ],
+      "aliases": [
+        "xai",
+        "grok"
+      ]
+    },
+    {
+      "id": "meta",
+      "name": "Meta",
+      "industries": [
+        "media",
+        "ai"
+      ],
+      "aliases": [
+        "meta",
+        "facebook",
+        "instagram",
+        "whatsapp",
+        "llama",
+        "threads"
+      ]
+    },
+    {
+      "id": "amazon",
+      "name": "Amazon／AWS",
+      "industries": [
+        "cloud",
+        "ecom"
+      ],
+      "aliases": [
+        "amazon",
+        "aws",
+        "redshift",
+        "bedrock",
+        "alexa",
+        "亞馬遜"
+      ]
+    },
+    {
+      "id": "oracle",
+      "name": "Oracle",
+      "industries": [
+        "cloud"
+      ],
+      "aliases": [
+        "oracle",
+        "甲骨文"
+      ]
+    },
+    {
+      "id": "ibm",
+      "name": "IBM",
+      "industries": [
+        "cloud",
+        "ai"
+      ],
+      "aliases": [
+        "ibm"
+      ]
+    },
+    {
+      "id": "salesforce",
+      "name": "Salesforce",
+      "industries": [
+        "cloud"
+      ],
+      "aliases": [
+        "salesforce"
+      ]
+    },
+    {
+      "id": "cloudflare",
+      "name": "Cloudflare",
+      "industries": [
+        "cloud",
+        "sec"
+      ],
+      "aliases": [
+        "cloudflare"
+      ]
+    },
+    {
+      "id": "cisco",
+      "name": "Cisco",
+      "industries": [
+        "telco",
+        "sec"
+      ],
+      "aliases": [
+        "cisco"
+      ]
+    },
+    {
+      "id": "mozilla",
+      "name": "Mozilla／Firefox",
+      "industries": [
+        "dev"
+      ],
+      "aliases": [
+        "mozilla",
+        "firefox"
+      ]
+    },
+    {
+      "id": "redhat",
+      "name": "Red Hat",
+      "industries": [
+        "cloud",
+        "dev"
+      ],
+      "aliases": [
+        "red hat",
+        "redhat"
+      ]
+    },
+    {
+      "id": "tesla",
+      "name": "Tesla／特斯拉",
+      "industries": [
+        "auto",
+        "energy"
+      ],
+      "aliases": [
+        "tesla",
+        "特斯拉",
+        "cybercab"
+      ]
+    },
+    {
+      "id": "uber",
+      "name": "Uber",
+      "industries": [
+        "auto"
+      ],
+      "aliases": [
+        "uber"
+      ]
+    },
+    {
+      "id": "foxconn",
+      "name": "鴻海",
+      "industries": [
+        "mfg"
+      ],
+      "aliases": [
+        "鴻海",
+        "foxconn",
+        "富士康"
+      ]
+    },
+    {
+      "id": "quanta",
+      "name": "廣達",
+      "industries": [
+        "mfg",
+        "ai"
+      ],
+      "aliases": [
+        "廣達",
+        "quanta"
+      ]
+    },
+    {
+      "id": "wistron",
+      "name": "緯創",
+      "industries": [
+        "mfg"
+      ],
+      "aliases": [
+        "緯創",
+        "wistron"
+      ]
+    },
+    {
+      "id": "asus",
+      "name": "華碩 ASUS",
+      "industries": [
+        "device",
+        "mfg"
+      ],
+      "aliases": [
+        "華碩",
+        "asus"
+      ]
+    },
+    {
+      "id": "acer",
+      "name": "宏碁 Acer",
+      "industries": [
+        "device"
+      ],
+      "aliases": [
+        "宏碁",
+        "acer"
+      ]
+    },
+    {
+      "id": "huawei",
+      "name": "華為",
+      "industries": [
+        "telco",
+        "device"
+      ],
+      "aliases": [
+        "華為",
+        "huawei"
+      ]
+    },
+    {
+      "id": "xiaomi",
+      "name": "小米",
+      "industries": [
+        "device"
+      ],
+      "aliases": [
+        "小米",
+        "xiaomi"
+      ]
+    },
+    {
+      "id": "alibaba",
+      "name": "阿里巴巴／Qwen",
+      "industries": [
+        "ecom",
+        "ai",
+        "cloud"
+      ],
+      "aliases": [
+        "alibaba",
+        "阿里巴巴",
+        "qwen",
+        "阿里雲"
+      ]
+    },
+    {
+      "id": "tencent",
+      "name": "騰訊",
+      "industries": [
+        "media",
+        "game"
+      ],
+      "aliases": [
+        "tencent",
+        "騰訊",
+        "微信",
+        "wechat"
+      ]
+    },
+    {
+      "id": "bytedance",
+      "name": "字節跳動／TikTok",
+      "industries": [
+        "media"
+      ],
+      "aliases": [
+        "bytedance",
+        "字節跳動",
+        "tiktok",
+        "抖音"
+      ]
+    },
+    {
+      "id": "baidu",
+      "name": "百度",
+      "industries": [
+        "ai",
+        "media"
+      ],
+      "aliases": [
+        "baidu",
+        "百度"
+      ]
+    },
+    {
+      "id": "palantir",
+      "name": "Palantir",
+      "industries": [
+        "gov",
+        "ai"
+      ],
+      "aliases": [
+        "palantir"
+      ]
+    },
+    {
+      "id": "stripe",
+      "name": "Stripe",
+      "industries": [
+        "fin"
+      ],
+      "aliases": [
+        "stripe"
+      ]
+    },
+    {
+      "id": "visa",
+      "name": "Visa／Mastercard",
+      "industries": [
+        "fin"
+      ],
+      "aliases": [
+        "visa",
+        "mastercard"
+      ]
+    },
+    {
+      "id": "paypal",
+      "name": "PayPal",
+      "industries": [
+        "fin"
+      ],
+      "aliases": [
+        "paypal"
+      ]
+    },
+    {
+      "id": "coinbase",
+      "name": "Coinbase／Binance",
+      "industries": [
+        "fin"
+      ],
+      "aliases": [
+        "coinbase",
+        "binance",
+        "幣安"
+      ]
+    },
+    {
+      "id": "shopee",
+      "name": "蝦皮／Sea",
+      "industries": [
+        "ecom"
+      ],
+      "aliases": [
+        "蝦皮",
+        "shopee"
+      ]
+    },
+    {
+      "id": "shopify",
+      "name": "Shopify",
+      "industries": [
+        "ecom"
+      ],
+      "aliases": [
+        "shopify"
+      ]
+    },
+    {
+      "id": "netflix",
+      "name": "Netflix",
+      "industries": [
+        "media"
+      ],
+      "aliases": [
+        "netflix"
+      ]
+    },
+    {
+      "id": "spotify",
+      "name": "Spotify",
+      "industries": [
+        "media"
+      ],
+      "aliases": [
+        "spotify"
+      ]
+    },
+    {
+      "id": "nintendo",
+      "name": "任天堂",
+      "industries": [
+        "game"
+      ],
+      "aliases": [
+        "nintendo",
+        "任天堂"
+      ]
+    },
+    {
+      "id": "sony",
+      "name": "Sony",
+      "industries": [
+        "game",
+        "device"
+      ],
+      "aliases": [
+        "sony",
+        "playstation"
+      ]
+    },
+    {
+      "id": "valve",
+      "name": "Valve／Steam",
+      "industries": [
+        "game"
+      ],
+      "aliases": [
+        "valve",
+        "steam"
+      ]
+    },
+    {
+      "id": "epic",
+      "name": "Epic／Unity",
+      "industries": [
+        "game"
+      ],
+      "aliases": [
+        "epic games",
+        "unity",
+        "unreal"
+      ]
+    },
+    {
+      "id": "spacex",
+      "name": "SpaceX／Starlink",
+      "industries": [
+        "telco"
+      ],
+      "aliases": [
+        "spacex",
+        "starlink"
+      ]
+    },
+    {
+      "id": "cht",
+      "name": "中華電信",
+      "industries": [
+        "telco"
+      ],
+      "aliases": [
+        "中華電信"
+      ]
+    },
+    {
+      "id": "dell",
+      "name": "Dell／HP／Lenovo",
+      "industries": [
+        "device"
+      ],
+      "aliases": [
+        "dell",
+        "lenovo",
+        "聯想"
+      ]
+    },
+    {
+      "id": "broadcom",
+      "name": "Broadcom／VMware",
+      "industries": [
+        "semi",
+        "cloud"
+      ],
+      "aliases": [
+        "broadcom",
+        "vmware",
+        "博通"
+      ]
+    }
+  ]
+}

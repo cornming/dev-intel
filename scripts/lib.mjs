@@ -309,9 +309,9 @@ const clip = (s, n) => String(s ?? '')
   .replace(/[\u0000-\u001f\u007f]/g, ' ')
   .replace(/\s+/g, ' ').trim().slice(0, n);
 
-export function buildAnalysisInput(items, kev, limit = 70) {
+export function buildAnalysisInput(items, kev, limit = 110) {
   const top = items.filter((x) => !x.stale).slice(0, limit).map((x) => ({
-    id: x.id, source: x.source, type: sourceTypeOf(x.source), title: clip(x.title, 140),
+    id: x.id, source: x.source, type: sourceTypeOf(x.source), title: clip(x.title, 140), time: x.time ?? x.firstSeen ?? null,
     score: x.score ?? 0, comments: x.comments ?? 0, tags: x.tags, sources: 1 + (x.alsoOn?.length ?? 0),
   }));
   const kevRows = (kev?.latest ?? []).slice(0, 8).map((v) => ({
@@ -324,7 +324,7 @@ export function buildAnalysisInput(items, kev, limit = 70) {
 const arr = (x, max) => (Array.isArray(x) ? x.slice(0, max) : []);
 const int = (n, lo, hi, d) => (Number.isFinite(+n) ? Math.min(hi, Math.max(lo, Math.round(+n))) : d);
 
-export function validateAnalysis(raw, validIds, validCves) {
+export function validateAnalysis(raw, validIds, validCves, { industries = [] } = {}) {
   if (!raw || typeof raw !== 'object') return null;
   const ids = validIds instanceof Set ? validIds : new Set(validIds);
   const cves = validCves instanceof Set ? validCves : new Set(validCves);
@@ -350,9 +350,24 @@ export function validateAnalysis(raw, validIds, validCves) {
   const glossary = arr(raw.glossary, 6).map((g) => ({ term: clip(g?.term, 30), definition: clip(g?.definition, 120), why: clip(g?.why, 120) }))
     .filter((g) => g.term && g.definition);
 
+  // 事件脈絡：把「報導同一件事」的項目分在一起。每個項目最多屬於一個事件；少於 2 個有效項目的事件丟棄；項目照出現順序保留。
+  const indSet = new Set(industries);
+  const used = new Set();
+  const events = [];
+  for (const e of arr(raw.events, 8)) {
+    // 逐一處理並即時標記：前面的事件用掉的項目，後面的事件就不能再用
+    const itemIds = [];
+    for (const id of arr(e?.itemIds, 12)) if (ids.has(id) && !used.has(id) && !itemIds.includes(id)) itemIds.push(id);
+    const ev = { name: clip(e?.name, 40), summary: clip(e?.summary, 200), itemIds, industries: arr(e?.industries, 2).filter((i) => indSet.has(i)) };
+    if (!ev.name || !ev.summary || ev.itemIds.length < 2) continue;
+    ev.itemIds.forEach((id) => used.add(id));
+    events.push(ev);
+  }
+  events.sort((a, b) => b.itemIds.length - a.itemIds.length);
+
   const summary = clip(raw.summary, 300);
-  if (!summary && !actions.length && !highlights.length) return null;
-  return { summary, actions, highlights, divergences, glossary };
+  if (!summary && !actions.length && !highlights.length && !events.length) return null;
+  return { summary, actions, highlights, divergences, glossary, events };
 }
 
 // 同一來源有 minCount 則以上共用同一張圖，多半是網站的預設分享圖／站徽（例如 iT邦幫忙的 fbpic.jpg），不是文章封面。

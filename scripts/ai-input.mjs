@@ -13,7 +13,7 @@ if (!res.ok) { console.error(`取得最新資料失敗：HTTP ${res.status}`); p
 const latest = await res.json();
 if (!isValidSnapshot(latest) || !latest.items.length) { console.error('最新資料格式不符或沒有項目'); process.exit(1); }
 
-const input = { generatedAt: latest.generatedAt, ...buildAnalysisInput(latest.items, latest.kev) };
+const input = { generatedAt: latest.generatedAt, industryIds: (latest.taxonomy?.industries ?? []).map((i) => `${i.id}（${i.name}）`), ...buildAnalysisInput(latest.items, latest.kev) };
 await mkdir(outDir, { recursive: true });
 await writeFile(resolve(outDir, 'latest.json'), JSON.stringify(latest));
 await writeFile(resolve(outDir, 'input.json'), JSON.stringify(input, null, 1));
