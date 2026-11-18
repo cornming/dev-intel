@@ -87,3 +87,7 @@ table{border-collapse:collapse;width:100%;font-size:.88rem}
 th,td{text-align:left;padding:6px 10px;border-bottom:1px solid var(--line);vertical-align:top}
 th{color:var(--muted);font-weight:600;white-space:nowrap}
 .muted{color:var(--muted);font-size:.85rem;margin:0 0 8px}
+
+.sub-line{margin:0 0 8px;color:var(--muted);font-size:.85rem}
+.sub-line a{color:var(--accent)}
+.subs{margin:0 0 8px;line-height:1.9}

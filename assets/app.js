@@ -1,13 +1,7 @@
 'use strict';
 // 排程（台北時間）：每日 00:00、05:00、10:00、15:00、20:00。台北沒有日光節約時間，固定 UTC+8。
 const SCHEDULE_HOURS = [0, 5, 10, 15, 20];
-const TABS = [
-  { key: 'all', label: '全部', test: () => true },
-  { key: 'tw', label: '🇹🇼 台灣', test: (x) => x.region === 'tw' },
-  { key: 'global', label: '🌍 國際', test: (x) => x.region === 'global' && x.kind === 'news' && !x.tags.includes('職場') },
-  { key: 'repo', label: '⭐ 開源新星', test: (x) => x.kind === 'repo' },
-  { key: 'job', label: '💼 職場', test: (x) => x.kind === 'job' || x.tags.includes('職場') },
-];
+const TABS = DevTabs.TABS; // 與訂閱輸出共用（assets/tabs.js）
 const PANEL_TABS = [
   { key: 'brief', label: '✨ 今日重點', panel: true, when: (d) => d.analysis && !d.analysis.empty },
   { key: 'sec', label: '🛡 資安與版本', panel: true, when: (d) => d.kev && d.kev.latest?.length },
@@ -284,6 +278,8 @@ function render() {
   const tab = visibleTabs().find((t) => t.key === state.tab);
   $('cards-ui').hidden = !!tab.panel; $('panel').hidden = !tab.panel;
   if (tab.panel) { $('panel').replaceChildren(tab.key === 'brief' ? renderBrief() : renderSecurity()); return; }
+  $('sub-atom').href = tab.key === 'all' ? 'feed.xml' : `feeds/${tab.key}.atom.xml`; // 目前分類的訂閱連結
+  $('sub-rss').href = `feeds/${tab.key}.rss.xml`;
   const pool = state.data.items.filter(tab.test);
   if (state.tag && !pool.some((x) => tagsOf(x).includes(state.tag))) state.tag = '';
   renderFilters(pool);

@@ -47,7 +47,7 @@ jobs:
       - name: 整理要發布的檔案
         run: |
           mkdir _site
-          cp -r index.html assets data _site/
+          cp -r index.html assets data feeds feed.xml _site/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

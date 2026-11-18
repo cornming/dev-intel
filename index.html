@@ -6,6 +6,12 @@
 <title>軟體人情報站</title>
 <meta name="description" content="每 5 小時自動更新：彙整台灣與國際的軟體開發新聞、開源新星專案與職場討論。">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E📡%3C/text%3E%3C/svg%3E">
+<link rel="alternate" type="application/atom+xml" title="軟體人情報站｜全部（Atom）" href="feed.xml">
+<link rel="alternate" type="application/rss+xml" title="軟體人情報站｜全部（RSS）" href="feeds/all.rss.xml">
+<link rel="alternate" type="application/atom+xml" title="軟體人情報站｜台灣（Atom）" href="feeds/tw.atom.xml">
+<link rel="alternate" type="application/atom+xml" title="軟體人情報站｜國際（Atom）" href="feeds/global.atom.xml">
+<link rel="alternate" type="application/atom+xml" title="軟體人情報站｜開源新星（Atom）" href="feeds/repo.atom.xml">
+<link rel="alternate" type="application/atom+xml" title="軟體人情報站｜職場（Atom）" href="feeds/job.atom.xml">
 <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
@@ -35,6 +41,7 @@
   <div class="chips" id="tags" role="group" aria-label="依主題篩選"></div>
   <p class="tr-status" id="tr-status" role="status" aria-live="polite"></p>
   <p class="count" id="count" aria-live="polite"></p>
+  <p class="sub-line" id="sub-line">📡 訂閱此分類：<a id="sub-atom" href="feed.xml">Atom</a> · <a id="sub-rss" href="feeds/all.rss.xml">RSS</a></p>
   <ol class="grid" id="list"></ol>
   <p class="empty" id="empty" hidden>沒有符合條件的內容。</p>
   </div>
@@ -42,9 +49,16 @@
 </main>
 
 <footer class="wrap foot">
+  <p class="subs">📡 訂閱（每個分類都有 Atom 與 RSS，最新 50 則）：
+    <a href="feed.xml">全部</a>（<a href="feeds/all.rss.xml">RSS</a>）·
+    <a href="feeds/tw.atom.xml">台灣</a>（<a href="feeds/tw.rss.xml">RSS</a>）·
+    <a href="feeds/global.atom.xml">國際</a>（<a href="feeds/global.rss.xml">RSS</a>）·
+    <a href="feeds/repo.atom.xml">開源新星</a>（<a href="feeds/repo.rss.xml">RSS</a>）·
+    <a href="feeds/job.atom.xml">職場</a>（<a href="feeds/job.rss.xml">RSS</a>）</p>
   <p>內容版權屬於原網站，本站只彙整標題與連結。卡片的排序依各來源的分數／名次與發布時間計算，標題不經過 AI 改寫；「✨ 今日重點」頁籤由 AI 整理（有標示），只依標題與來源資料判斷，請以原文為準。「資安與版本」為官方資料。
   <a href="https://github.com/cornming/dev-intel">原始碼</a></p>
 </footer>
+<script src="assets/tabs.js" defer></script>
 <script src="assets/translate.js" defer></script>
 <script src="assets/urlstate.js" defer></script>
 <script src="assets/app.js" defer></script>

@@ -33,6 +33,27 @@
 
 排名與主題規則都在 `scripts/lib.mjs`、來源清單與權重在 `scripts/sources.mjs`，要新增來源只要加一個 `rssSource({...})`。
 
+## 訂閱（Atom／RSS）
+
+每個分類各有一組，最新 50 則（依熱度排序），每 5 小時隨網站一起更新：
+
+| 分類 | Atom | RSS 2.0 |
+|---|---|---|
+| 全部 | `/feed.xml`（或 `/feeds/all.atom.xml`） | `/feeds/all.rss.xml` |
+| 台灣 | `/feeds/tw.atom.xml` | `/feeds/tw.rss.xml` |
+| 國際 | `/feeds/global.atom.xml` | `/feeds/global.rss.xml` |
+| 開源新星 | `/feeds/repo.atom.xml` | `/feeds/repo.rss.xml` |
+| 職場 | `/feeds/job.atom.xml` | `/feeds/job.rss.xml` |
+
+網站首頁頁尾與每個分類的訂閱列都有連結，頁首也有自動探索用的 `<link rel="alternate">`，多數閱讀器貼上網站網址就能找到。
+
+- 各分類的規則與網站頁籤共用同一份 `assets/tabs.js`，所以「訂閱的職場」就是「網頁上的職場」。
+- 每則包含：標題、原文連結、來源與類型、主題標籤、分數與討論連結、封面圖（HTML 摘要）。**只有標題與連結，不轉載全文。**
+- 項目 id 固定（`tag:cornming.github.io,2026:dev-intel:<id>`），時間取發布時間，閱讀器不會把舊文章當成新文章重複通知。
+- 內容經過嚴格處理：特殊字元轉義、XML 不允許的控制字元移除、只收 http(s) 連結與 https 圖片。
+- 這些檔案由 `scripts/feeds.mjs` 在每次建置時產生，不進 git（`.gitignore`），隨網站部署。
+- 不含「✨ 今日重點」：那份 AI 分析是另外由排程任務發布的。
+
 ## 篩選狀態記在網址
 
 頁籤、主題標籤、來源、排序與搜尋字詞都會同步到網址，可以直接複製分享，重新整理也不會跑掉。例如：

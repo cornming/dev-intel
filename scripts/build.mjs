@@ -6,6 +6,7 @@ import { SOURCES } from './sources.mjs';
 import { dedupe, mergeHistory, finalize, nextStreaks, sourceTypeOf, dropSharedImages } from './lib.mjs';
 import { enrichImages } from './images.mjs';
 import { fetchKev, fetchLifecycle } from './security.mjs';
+import { writeFeeds } from './feeds.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = resolve(ROOT, 'data/latest.json');
@@ -63,5 +64,7 @@ const out = {
 };
 await mkdir(dirname(OUT), { recursive: true });
 await writeFile(OUT, JSON.stringify(out) + '\n');
+const feedFiles = await writeFeeds(out);
+console.log(`訂閱輸出：${feedFiles.length} 個檔案（${[...new Set(feedFiles.map((f) => f.path.split('/').pop().split('.')[0]))].join('、')}）`);
 console.log(`完成：${okCount}/${results.length} 個來源成功，共 ${items.length} 則。`);
 for (const r of [...results, ...extra]) console.log(`  ${r.ok ? '✓' : '✗'} ${r.name} ${r.count}`);
