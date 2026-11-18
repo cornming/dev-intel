@@ -1,0 +1,2760 @@
+{
+"note": "銀標準：DEV 與 Lobsters 的作者／社群自己貼的標籤，對應到本站主題（獨立於規則的參考答案，不完整）。資料取自 2026-11-18。用於量測召回率與精確率下限，防止改規則時退步。",
+"items": [
+{
+"title": "Long Live Rails",
+"truth": [
+"語言",
+"AI"
+],
+"src": "DEV",
+"rawTags": [
+"rails",
+"ruby",
+"rust",
+"ai"
+]
+},
+{
+"title": "MCP Is Dead Simple. And That's Exactly the Problem",
+"truth": [
+"AI",
+"前端"
+],
+"src": "DEV",
+"rawTags": [
+"mcp",
+"ai",
+"agents",
+"typescript"
+]
+},
+{
+"title": "Congrats to the Hacktoberfest Open-Source AI Challenge Week 4: Ghost in the Machine Winners!",
+"truth": [
+"AI"
+],
+"src": "DEV",
+"rawTags": [
+"devchallenge",
+"hf26challenge",
+"hacktoberfest",
+"ai"
+]
+},
+{
+"title": "Ghost Rovers: I Called 12 Machines NASA Left Behind. One Picked Up.",
+"truth": [
+"AI",
+"前端"
+],
+"src": "DEV",
+"rawTags": [
+"ai",
+"webdev",
+"hackathon",
+"showdev"
+]
+},
+{
+"title": "AI is getting better. Here is my plan to stay ahead.",
+"truth": [
+"AI",
+"開發工具"
+],
+"src": "DEV",
+"rawTags": [
+"ai",
+"productivity",
+"programming",
+"discuss"
+]
+},
+{
+"title": "We Keep Hearing About AI Productivity. The QA Group Chat Told a Different Story.",
+"truth": [
+"AI",
+"職場"
+],
+"src": "DEV",
+"rawTags": [
+"ai",
+"discuss",
+"career",
+"programming"
+]
+},
+{
+"title": "DEVengers Weekly #1: The MCP Reality Check, Career Moats, and 25 Weeks on the Radar 🚀",
+"truth": [
+"開源"
+],
+"src": "DEV",
+"rawTags": [
+"devengers",
+"newsletter",
+"opensource",
+"discuss"
+]
+},
+{
+"title": "Meet type-tune! 🦀 Give Your TypeScript Types a Better Home! 😸",
+"truth": [
+"語言",
+"前端",
+"開源"
+],
+"src": "DEV",
+"rawTags": [
+"rust",
+"typescript",
+"showdev",
+"opensource"
+]
+},
+{
+"title": "Ultimate AI Roast! 😂😹",
+"truth": [
+"AI",
+"前端",
+"開發工具"
+],
+"src": "DEV",
+"rawTags": [
+"ai",
+"webdev",
+"claude",
+"cli"
+]
+},
+{
+"title": "AI Avatar v28 (Security Support, Voxel Avatar)🛡️",
+"truth": [
+"AI",
+"前端",
+"開發工具",
+"資安"
+],
+"src": "DEV",
+"rawTags": [
+"ai",
+"webdev",
+"productivity",
+"security"
+]
+},
+{
+"title": "AI can write code, but the magic of a first project is unmatched! 🗽",
+"truth": [
+"前端"
+],
+"src": "DEV",
+"rawTags": [
+"html",
+"programming",
+"javascript",
+"nicoz"
+]
+},
+{
+"title": "Cat Mutilation Successful!! 🛸 Welcome New Members!! 🐈🎉",
+"truth": [
+"開源",
+"開發工具"
+],
+"src": "DEV",
+"rawTags": [
+"necoz",
+"opensource",
+"community",
+"github"
+]
+},
+{
+"title": "remove.bg Is Shutting Down — Here's a Free, No-Upload Alternative",
+"truth": [
+"前端",
+"AI"
+],
+"src": "DEV",
+"rawTags": [
+"showdev",
+"webdev",
+"ai",
+"webassembly"
+]
+},
+{
+"title": "8 a.m. Thoughts: Word Press, Security, and Legacy 💭🤔",
+"truth": [
+"前端",
+"資安"
+],
+"src": "DEV",
+"rawTags": [
+"webdev",
+"wordpress",
+"security",
+"beginners"
+]
+},
+{
+"title": "Can't Beat Free: Gemma 4 31B on AMD Token Lab, with a Local Chat Page and an ADK Agent",
+"truth": [
+"AI"
+],
+"src": "DEV",
+"rawTags": [
+"gemma",
+"amd",
+"adk",
+"ai"
+]
+},
+{
+"title": "Your Agent Needs a Schema, Not a Better Prompt",
+"truth": [
+"AI"
+],
+"src": "DEV",
+"rawTags": [
+"ai",
+"agents",
+"llm",
+"architecture"
+]
+},
+{
+"title": "Could I Still Do This From Scratch?",
+"truth": [
+"AI",
+"職場"
+],
+"src": "DEV",
+"rawTags": [
+"ai",
+"programming",
+"career",
+"discuss"
+]
+},
+{
+"title": "🐱 The Great Cat Party on necoz Planet! 🚀Python variable",
+"truth": [
+"語言"
+],
+"src": "DEV",
+"rawTags": [
+"discuss",
+"python",
+"programming",
+"beginners"
+]
+},
+{
+"title": "Your MCP Servers Are Silently Draining Your Context Window: The Hidden Cost of Tool-Heavy AI Agents",
+"truth": [
+"AI",
+"前端",
+"開源",
+"開發工具"
+],
+"src": "DEV",
+"rawTags": [
+"ai",
+"typescript",
+"opensource",
+"productivity"
+]
+},
+{
+"title": "AI Code Is Unmaintainable? So Is Ours.",
+"truth": [
+"AI"
+],
+"src": "DEV",
+"rawTags": [
+"ai",
+"programming",
+"softwareengineering",
+"discuss"
+]
+},
+{
+"title": "One Month After the Hackathon: Why My 4-Service App Stopped Working (and What @mansio Caught in the Verifiers)",
+"truth": [
+"AI",
+"前端",
+"開源"
+],
+"src": "DEV",
+"rawTags": [
+"ai",
+"javascript",
+"buildinpublic",
+"opensource"
+]
+},
+{
+"title": "Four Applications and One Ask. Guess Which One Scared Me.",
+"truth": [
+"AI",
+"職場"
+],
+"src": "DEV",
+"rawTags": [
+"ai",
+"career",
+"womenintech",
+"discuss"
+]
+},
+{
+"title": "Killed by Acronyms",
+"truth": [
+"職場"
+],
+"src": "DEV",
+"rawTags": [
+"career",
+"development",
+"english"
+]
+},
+{
+"title": "The Case for Smart Software",
+"truth": [
+"AI"
+],
+"src": "DEV",
+"rawTags": [
+"jev",
+"ai",
+"software",
+"aie"
+]
+},
+{
+"title": "Five Palaces, One Model: Testing Google’s Gemini 4 Hydrogen in AI Studio",
+"truth": [
+"AI",
+"前端"
+],
+"src": "DEV",
+"rawTags": [
+"gemini",
+"ai",
+"threejs",
+"webdev"
+]
+},
+{
+"title": "What are your goals for the week? #205",
+"truth": [
+"職場",
+"開發工具"
+],
+"src": "DEV",
+"rawTags": [
+"career",
+"discuss",
+"productivity"
+]
+},
+{
+"title": "Benchmarking the Gemini Decisions API",
+"truth": [
+"AI"
+],
+"src": "DEV",
+"rawTags": [
+"gemini",
+"adk",
+"gemma",
+"ai"
+]
+},
+{
+"title": "AI agents open 17 million pull requests a month. I built a gate that rejects the ones that lie.",
+"truth": [
+"AI",
+"雲端"
+],
+"src": "DEV",
+"rawTags": [
+"ai",
+"aws",
+"devops",
+"discuss"
+]
+},
+{
+"title": "How To Review Pull Requests with Kiro CLI and GitHub Actions",
+"truth": [
+"AI",
+"雲端"
+],
+"src": "DEV",
+"rawTags": [
+"kiro",
+"githubactions",
+"ai",
+"devops"
+]
+},
+{
+"title": "High or Low Thinking? Gemini 4 and Gemma 4 on Hard Math, Cost First",
+"truth": [
+"AI"
+],
+"src": "DEV",
+"rawTags": [
+"gemini",
+"gemma",
+"benchmark",
+"ai"
+]
+},
+{
+"title": "🛸 Necoz: The UFO Kingdom Python Loops 🐱",
+"truth": [
+"語言"
+],
+"src": "DEV",
+"rawTags": [
+"python",
+"programming",
+"beginners",
+"discuss"
+]
+},
+{
+"title": "My AI agent kept quoting a number I had already corrected. What has yours remembered wrong?",
+"truth": [
+"AI",
+"開發工具"
+],
+"src": "DEV",
+"rawTags": [
+"discuss",
+"ai",
+"agents",
+"productivity"
+]
+},
+{
+"title": "PitchPulse — Rehearsing Recovery for High-Pressure Speaking (Powered by Presage SmartSpectra)",
+"truth": [
+"前端"
+],
+"src": "DEV",
+"rawTags": [
+"devchallenge",
+"presagechallenge",
+"electron",
+"react"
+]
+},
+{
+"title": "Scope WebMCP Tools to the Open React Workflow",
+"truth": [
+"前端"
+],
+"src": "DEV",
+"rawTags": [
+"typescript",
+"webmcp",
+"webdev",
+"react"
+]
+},
+{
+"title": "Google AI Classroom Part 9: Gamified \"Bingo\" Active Presence Verification & Zero-Trust Proctored Exam Mode on Google Cloud",
+"truth": [
+"雲端",
+"AI"
+],
+"src": "DEV",
+"rawTags": [
+"firebase",
+"gamification",
+"googlecloud",
+"gemini"
+]
+},
+{
+"title": "The Arrogance of Having Outgrown Arrogance",
+"truth": [
+"職場"
+],
+"src": "DEV",
+"rawTags": [
+"career",
+"learning"
+]
+},
+{
+"title": "Your 100% Lighthouse A11y Score Is a Lie: The Visual Architecture Guide to the Browser Accessibility Tree",
+"truth": [
+"前端"
+],
+"src": "DEV",
+"rawTags": [
+"a11y",
+"webdev",
+"frontend",
+"discuss"
+]
+},
+{
+"title": "Recover a WebMCP Update After Its Response Disappears",
+"truth": [
+"前端"
+],
+"src": "DEV",
+"rawTags": [
+"testing",
+"typescript",
+"webmcp",
+"react"
+]
+},
+{
+"title": "An MCP Tool Call Can Resolve and Still Fail",
+"truth": [
+"AI",
+"前端"
+],
+"src": "DEV",
+"rawTags": [
+"ai",
+"typescript",
+"testing",
+"mcp"
+]
+},
+{
+"title": "How Open-Source LLMs Differ: Comparing 130+ Model Architectures",
+"truth": [
+"AI"
+],
+"src": "DEV",
+"rawTags": [
+"ai",
+"llm",
+"deeplearning",
+"deepseek"
+]
+},
+{
+"title": "Part 5: The Control That Protected an Empty Bucket",
+"truth": [
+"雲端",
+"資安",
+"AI"
+],
+"src": "DEV",
+"rawTags": [
+"devops",
+"security",
+"ai",
+"programming"
+]
+},
+{
+"title": "The Vibe Coding Kernel-pocalypse Is Here, and It Is a Good Thing",
+"truth": [
+"系統",
+"AI"
+],
+"src": "DEV",
+"rawTags": [
+"linux",
+"kernel",
+"ai",
+"claude"
+]
+},
+{
+"title": "What Changes With the A2UI 1.0 Release",
+"truth": [
+"AI",
+"前端"
+],
+"src": "DEV",
+"rawTags": [
+"a2ui",
+"agents",
+"gemini",
+"react"
+]
+},
+{
+"title": "Day 85: A Task That Always Changes and Two Halves",
+"truth": [
+"雲端"
+],
+"src": "DEV",
+"rawTags": [
+"devops",
+"ansible",
+"azure",
+"automation"
+]
+},
+{
+"title": "PostgreSQL 19's pg_plan_advice turned a 28ms query into 264ms under load",
+"truth": [
+"後端",
+"雲端"
+],
+"src": "DEV",
+"rawTags": [
+"postgres",
+"database",
+"performance",
+"devops"
+]
+},
+{
+"title": ".NET 11 Unpacked: Why I'm Recommending STS This Time",
+"truth": [
+"語言"
+],
+"src": "DEV",
+"rawTags": [
+"dotnet",
+"csharp",
+"news",
+"performance"
+]
+},
+{
+"title": "Day 83: Two Files and Four Parts",
+"truth": [
+"雲端"
+],
+"src": "DEV",
+"rawTags": [
+"devops",
+"ansible",
+"azure",
+"automation"
+]
+},
+{
+"title": "Build an Offline AI Study App with Local Models (Liquid AI LFM3-1.7B)",
+"truth": [
+"AI",
+"前端"
+],
+"src": "DEV",
+"rawTags": [
+"ai",
+"webdev",
+"javascript",
+"webgpu"
+]
+},
+{
+"title": "Git 2.56's history drop command replays commits 40 to 77 times faster than rebase",
+"truth": [
+"開發工具",
+"雲端"
+],
+"src": "DEV",
+"rawTags": [
+"git",
+"devops",
+"performance",
+"cli"
+]
+},
+{
+"title": "ClickHouse 26.10's string filter during scan cuts a selective LIKE query's memory 25-fold",
+"truth": [
+"後端",
+"雲端"
+],
+"src": "DEV",
+"rawTags": [
+"clickhouse",
+"database",
+"performance",
+"devops"
+]
+},
+{
+"title": "Enterprise SSO for B2B SaaS: How to Prepare Before Your First Big Customer Asks",
+"truth": [
+"資安",
+"前端"
+],
+"src": "DEV",
+"rawTags": [
+"keycloak",
+"saas",
+"security",
+"webdev"
+]
+},
+{
+"title": "MCP, A2A, UCP, AP2... Confused? A Simple Map of AI Agent Protocols (November 2026)",
+"truth": [
+"AI",
+"雲端"
+],
+"src": "DEV",
+"rawTags": [
+"ai",
+"agents",
+"mcp",
+"googlecloud"
+]
+},
+{
+"title": "A VS Code extension to turn ANY free chatbot website into an AI agent (kind of)",
+"truth": [
+"AI",
+"開發工具",
+"開源"
+],
+"src": "DEV",
+"rawTags": [
+"ai",
+"productivity",
+"programming",
+"opensource"
+]
+},
+{
+"title": "How emulators might catch what you might miss",
+"truth": [
+"雲端",
+"AI"
+],
+"src": "DEV",
+"rawTags": [
+"aws",
+"testing",
+"ai",
+"devops"
+]
+},
+{
+"title": "LLMs are compressors. So I chatted with gzip",
+"truth": [
+"AI",
+"雲端"
+],
+"src": "DEV",
+"rawTags": [
+"llm",
+"compression",
+"aws",
+"serverless"
+]
+},
+{
+"title": "I turned my GitHub profile into a Doctor Doom vs Avengers fight",
+"truth": [
+"開發工具"
+],
+"src": "DEV",
+"rawTags": [
+"watercooler",
+"github",
+"showdev",
+"beginners"
+]
+},
+{
+"title": "Using AI for Anonymity",
+"truth": [
+"AI"
+],
+"src": "DEV",
+"rawTags": [
+"ai",
+"llm",
+"writing"
+]
+},
+{
+"title": "Thinking On or Off? Gemma 4 E2B on an 8 GB RTX 3050",
+"truth": [
+"AI"
+],
+"src": "DEV",
+"rawTags": [
+"gemma",
+"llm",
+"benchmark",
+"ai"
+]
+},
+{
+"title": "The Hidden Cost of PostgreSQL JSONB Columns Under High Write Load",
+"truth": [
+"後端"
+],
+"src": "DEV",
+"rawTags": [
+"postgres",
+"database",
+"performance",
+"backend"
+]
+},
+{
+"title": "Your AI Agent Retried the Tool Call. The First One Had Already Succeeded.",
+"truth": [
+"AI",
+"後端"
+],
+"src": "DEV",
+"rawTags": [
+"ai",
+"architecture",
+"programming",
+"backend"
+]
+},
+{
+"title": "My coding agent kept undoing things we'd already decided",
+"truth": [
+"AI",
+"開源"
+],
+"src": "DEV",
+"rawTags": [
+"ai",
+"claude",
+"opensource",
+"devtools"
+]
+},
+{
+"title": "WebMCP in Practice - Turn an HTML Form into an Agent Tool",
+"truth": [
+"AI",
+"前端"
+],
+"src": "DEV",
+"rawTags": [
+"webmcp",
+"ai",
+"typescript"
+]
+},
+{
+"title": "How I Made a Markov Chain Model from Scratch in C++ During a Global Online Teen Hackathon",
+"truth": [
+"語言",
+"AI"
+],
+"src": "DEV",
+"rawTags": [
+"cpp",
+"showdev",
+"programming",
+"ai"
+]
+},
+{
+"title": "Jira said Done. It wasn't, and the bug showed up later. So I made Jira check first.",
+"truth": [
+"AI",
+"開源"
+],
+"src": "DEV",
+"rawTags": [
+"ai",
+"testing",
+"showdev",
+"opensource"
+]
+},
+{
+"title": "Monuments of India, Part 2: Domes, Arches, Realistic Stone and Finer Details in three.js",
+"truth": [
+"前端"
+],
+"src": "DEV",
+"rawTags": [
+"javascript",
+"threejs",
+"showdev",
+"webgl"
+]
+},
+{
+"title": "Temporal & AI: Agent Memory & Execution State",
+"truth": [
+"AI",
+"語言"
+],
+"src": "DEV",
+"rawTags": [
+"agents",
+"ai",
+"architecture",
+"python"
+]
+},
+{
+"title": "Strands to Strands over A2A on Bedrock AgentCore, With IAM as the Only Credential",
+"truth": [
+"雲端",
+"AI",
+"資安",
+"語言"
+],
+"src": "DEV",
+"rawTags": [
+"aws",
+"ai",
+"security",
+"python"
+]
+},
+{
+"title": "Give Your Voice Agent Hands: Let It Act Across Sales and Marketing",
+"truth": [
+"AI",
+"前端",
+"開發工具"
+],
+"src": "DEV",
+"rawTags": [
+"ai",
+"webdev",
+"productivity",
+"programming"
+]
+},
+{
+"title": "AWS Extended Support: what it costs and how to find everything you're about to pay for",
+"truth": [
+"雲端",
+"後端"
+],
+"src": "DEV",
+"rawTags": [
+"aws",
+"kubernetes",
+"devops",
+"postgres"
+]
+},
+{
+"title": "Keeping a software factory stable at 1,000 PRs a week",
+"truth": [
+"AI",
+"雲端"
+],
+"src": "DEV",
+"rawTags": [
+"agents",
+"automation",
+"devops",
+"softwareengineering"
+]
+},
+{
+"title": "Introducing Sawala Mono: An Ergonomic Coding Font Built for Code Reviews and Terminal Workflows",
+"truth": [
+"開源",
+"開發工具"
+],
+"src": "DEV",
+"rawTags": [
+"opensource",
+"productivity",
+"programming",
+"devtools"
+]
+},
+{
+"title": "Zombie Sweep: A Daily Serverless Hunt for Unused AWS Resources",
+"truth": [
+"雲端",
+"語言"
+],
+"src": "DEV",
+"rawTags": [
+"aws",
+"serverless",
+"finops",
+"python"
+]
+},
+{
+"title": "One model gateway across clouds: LiteLLM on Cloud Run and Azure with zero API keys",
+"truth": [
+"雲端",
+"AI",
+"資安"
+],
+"src": "DEV",
+"rawTags": [
+"googlecloud",
+"azure",
+"ai",
+"security"
+]
+},
+{
+"title": "Correcting \"897 Fake Followers\": What My Own Follower Data Actually Shows",
+"truth": [
+"資安",
+"開源",
+"語言"
+],
+"src": "DEV",
+"rawTags": [
+"security",
+"opensource",
+"python",
+"osint"
+]
+},
+{
+"title": "Are You a CSS Developer or a CSS Expert? 9 Tests I Failed Styling a 12,400-Line Photo Editor",
+"truth": [
+"前端"
+],
+"src": "DEV",
+"rawTags": [
+"css",
+"html",
+"beginners",
+"webassembly"
+]
+},
+{
+"title": "Prepare a WebMCP Review Without Submitting the Request",
+"truth": [
+"前端",
+"AI"
+],
+"src": "DEV",
+"rawTags": [
+"react",
+"typescript",
+"ai",
+"webmcp"
+]
+},
+{
+"title": "AI Agent Sessions Are a Data Store Nobody Designed",
+"truth": [
+"AI",
+"資安",
+"語言"
+],
+"src": "DEV",
+"rawTags": [
+"ai",
+"security",
+"go",
+"gdpr"
+]
+},
+{
+"title": "The Agentic Loop Explained: Step Through the Plan, Build, Judge and Repeat Loop Behind AI Coding Agents",
+"truth": [
+"AI"
+],
+"src": "DEV",
+"rawTags": [
+"ai",
+"agents",
+"llm",
+"programming"
+]
+},
+{
+"title": "[AI in Action] First Time Using Herdr: Collaborating with Claude Code and agy for Go Backend Code Review, Issue Fixes, and Cloud",
+"truth": [
+"AI",
+"後端",
+"語言"
+],
+"src": "DEV",
+"rawTags": [
+"ai",
+"backend",
+"claude",
+"go"
+]
+},
+{
+"title": "Avengers: Doomsday is 5 weeks away, so I built hexagon README badges. What are you building?",
+"truth": [
+"前端",
+"開源"
+],
+"src": "DEV",
+"rawTags": [
+"discuss",
+"watercooler",
+"webdev",
+"opensource"
+]
+},
+{
+"title": "DuckDB 2.0's quack server lets ten writers share one file for under 2ms a query",
+"truth": [
+"後端",
+"雲端"
+],
+"src": "DEV",
+"rawTags": [
+"database",
+"performance",
+"devops",
+"programming"
+]
+},
+{
+"title": "Devcon 8 Mumbai: Four Days at Ethereum's Biggest Builder Gathering",
+"truth": [
+"開發工具",
+"開源"
+],
+"src": "DEV",
+"rawTags": [
+"ethereum",
+"productivity",
+"opensource",
+"web3"
+]
+},
+{
+"title": "Dash: An Endless Runner That Races Through Your City",
+"truth": [
+"語言",
+"行動"
+],
+"src": "DEV",
+"rawTags": [
+"java",
+"mobile",
+"android",
+"ios"
+]
+},
+{
+"title": "iPhone + Linux = pain. So I built Rollcopy 🦀📸",
+"truth": [
+"系統",
+"語言",
+"開源"
+],
+"src": "DEV",
+"rawTags": [
+"linux",
+"rust",
+"opensource",
+"showdev"
+]
+},
+{
+"title": "Your Webcam Is Your Health Check-Up",
+"truth": [
+"AI",
+"開源"
+],
+"src": "DEV",
+"rawTags": [
+"devchallenge",
+"presagechallenge",
+"ai",
+"opensource"
+]
+},
+{
+"title": "Antigravity Research Kit: 8 Scientific Skills, Stdio MCP Server & Pure-SVG Comic Studio",
+"truth": [
+"AI",
+"語言",
+"開源"
+],
+"src": "DEV",
+"rawTags": [
+"ai",
+"python",
+"programming",
+"opensource"
+]
+},
+{
+"title": "SHENRON's durability numbers didn't survive review. Here's what did.",
+"truth": [
+"資安",
+"開源"
+],
+"src": "DEV",
+"rawTags": [
+"security",
+"blueteam",
+"sigma",
+"opensource"
+]
+},
+{
+"title": "Five of My Eight Agents Left Out the Same Caveat. A Vote Would Have Made It Official",
+"truth": [
+"AI"
+],
+"src": "DEV",
+"rawTags": [
+"ai",
+"agents",
+"llm",
+"machinelearning"
+]
+},
+{
+"title": "My Codex Agents Were Posting to Slack as Me",
+"truth": [
+"AI",
+"資安"
+],
+"src": "DEV",
+"rawTags": [
+"ai",
+"agents",
+"security",
+"llm"
+]
+},
+{
+"title": "Your AI Coding Agent Wrote a 600-Word Summary. What It Skipped Is in the Fine Print.",
+"truth": [
+"AI",
+"開發工具"
+],
+"src": "DEV",
+"rawTags": [
+"discuss",
+"ai",
+"softwareengineering",
+"productivity"
+]
+},
+{
+"title": "AI Coding Agents Need to Keep Their Promises",
+"truth": [
+"AI"
+],
+"src": "DEV",
+"rawTags": [
+"ai",
+"agents",
+"software"
+]
+},
+{
+"title": "How to Become a Tech Conference Speaker (And Why You Might Regret It)",
+"truth": [
+"職場"
+],
+"src": "DEV",
+"rawTags": [
+"career",
+"speaking",
+"techtalks"
+]
+},
+{
+"title": "How do you truly stand out in Tech?",
+"truth": [
+"開發工具",
+"職場"
+],
+"src": "DEV",
+"rawTags": [
+"discuss",
+"community",
+"productivity",
+"career"
+]
+},
+{
+"title": "How did you end up in tech, and are you staying?",
+"truth": [
+"職場"
+],
+"src": "DEV",
+"rawTags": [
+"discuss",
+"career",
+"beginners",
+"watercooler"
+]
+},
+{
+"title": "Don't Be a Proxy Between Me and Your AI",
+"truth": [
+"AI",
+"職場"
+],
+"src": "DEV",
+"rawTags": [
+"ai",
+"discuss",
+"career",
+"programming"
+]
+},
+{
+"title": "Doors I Walked Through to Reach DEV",
+"truth": [
+"職場"
+],
+"src": "DEV",
+"rawTags": [
+"career",
+"community",
+"writing",
+"devengers"
+]
+},
+{
+"title": "An AI Testing Presentation Became the Final Push for Organizational Change at My Company",
+"truth": [
+"AI",
+"職場"
+],
+"src": "DEV",
+"rawTags": [
+"discuss",
+"ai",
+"programming",
+"career"
+]
+},
+{
+"title": "No Human Will Ever Write Code Better Than LLMs? Better at What?",
+"truth": [
+"AI",
+"職場"
+],
+"src": "DEV",
+"rawTags": [
+"ai",
+"programming",
+"softwareengineering",
+"career"
+]
+},
+{
+"title": "Stratagems #32: The AI Logged a Withdrawal. P Took It as Proof.",
+"truth": [
+"AI",
+"職場"
+],
+"src": "DEV",
+"rawTags": [
+"ai",
+"discuss",
+"programming",
+"career"
+]
+},
+{
+"title": "Somewhere, Coding Stopped Being Allowed to Be Fun",
+"truth": [
+"職場",
+"AI"
+],
+"src": "DEV",
+"rawTags": [
+"career",
+"discuss",
+"ai",
+"mentalhealth"
+]
+},
+{
+"title": "AI Made Coding Cheaper. So Why Is Building Software Still So Expensive?",
+"truth": [
+"AI",
+"開發工具",
+"職場"
+],
+"src": "DEV",
+"rawTags": [
+"ai",
+"productivity",
+"career",
+"programming"
+]
+},
+{
+"title": "Não precisa ser popular pra compartilhar: minha história até Berlim",
+"truth": [
+"職場"
+],
+"src": "DEV",
+"rawTags": [
+"community",
+"braziliandevs",
+"career",
+"onceuponaws"
+]
+},
+{
+"title": "Plan Stamping, for Software",
+"truth": [
+"AI",
+"職場"
+],
+"src": "DEV",
+"rawTags": [
+"ai",
+"career",
+"discuss",
+"programming"
+]
+},
+{
+"title": "I Never Thought I'd Be a Programmer. Yet Here I Am.",
+"truth": [
+"職場",
+"AI"
+],
+"src": "DEV",
+"rawTags": [
+"devjournal",
+"beginners",
+"career",
+"ai"
+]
+},
+{
+"title": "I'm a First-Year ECE Student Trying to Figure Out \"The Prestige Path\" vs. Just Building Stuff",
+"truth": [
+"職場"
+],
+"src": "DEV",
+"rawTags": [
+"discuss",
+"career",
+"beginners",
+"development"
+]
+},
+{
+"title": "Buried Reads #1: Five Good Posts That Deserve More Attention",
+"truth": [
+"職場"
+],
+"src": "DEV",
+"rawTags": [
+"discuss",
+"writing",
+"devjournal",
+"career"
+]
+},
+{
+"title": "Everyone Is Building AI to Replace Developers. Nobody Is Building the Plan for What Comes After.",
+"truth": [
+"AI",
+"職場"
+],
+"src": "DEV",
+"rawTags": [
+"discuss",
+"ai",
+"programming",
+"career"
+]
+},
+{
+"title": "I shipped my biggest project ever and felt… nothing",
+"truth": [
+"AI",
+"職場",
+"開發工具"
+],
+"src": "DEV",
+"rawTags": [
+"discuss",
+"ai",
+"career",
+"productivity"
+]
+},
+{
+"title": "🤷‍♀️ Soul Searching Amid Tech Frustrations",
+"truth": [
+"前端",
+"職場"
+],
+"src": "DEV",
+"rawTags": [
+"webdev",
+"beginners",
+"mentalhealth",
+"career"
+]
+},
+{
+"title": "Not the End, but a Shift: How AI Is Pushing Computer Science Toward Deeper Engineering",
+"truth": [
+"職場",
+"AI"
+],
+"src": "DEV",
+"rawTags": [
+"career",
+"ai",
+"computerscience",
+"software"
+]
+},
+{
+"title": "Kent C. Dodds Hasn't Looked at His Code All Year",
+"truth": [
+"AI",
+"職場",
+"開發工具"
+],
+"src": "DEV",
+"rawTags": [
+"ai",
+"agents",
+"career",
+"productivity"
+]
+},
+{
+"title": "I Miss Writing Code",
+"truth": [
+"職場",
+"AI"
+],
+"src": "DEV",
+"rawTags": [
+"career",
+"ai",
+"programming",
+"discuss"
+]
+},
+{
+"title": "My AI Coworker Is Very Caring. It Just Doesn't Know What Day It Is.",
+"truth": [
+"AI",
+"職場"
+],
+"src": "DEV",
+"rawTags": [
+"ai",
+"discuss",
+"career",
+"watercooler"
+]
+},
+{
+"title": "My Passion for Coding Isn't 404. It's 503.",
+"truth": [
+"開發工具",
+"職場"
+],
+"src": "DEV",
+"rawTags": [
+"programming",
+"productivity",
+"career",
+"discuss"
+]
+},
+{
+"title": "What are your goals for the week? #202",
+"truth": [
+"職場",
+"開發工具"
+],
+"src": "DEV",
+"rawTags": [
+"career",
+"discuss",
+"productivity",
+"sideprojects"
+]
+},
+{
+"title": "I Still Feel Like a Fraud. Here's What Actually Helps.",
+"truth": [
+"職場"
+],
+"src": "DEV",
+"rawTags": [
+"career",
+"mentalhealth",
+"discuss",
+"beginners"
+]
+},
+{
+"title": "I got rejected from 50 jobs. Then I deleted everything on my resume except one story — and the callbacks started.",
+"truth": [
+"職場",
+"AI",
+"前端",
+"開發工具"
+],
+"src": "DEV",
+"rawTags": [
+"career",
+"ai",
+"webdev",
+"productivity"
+]
+},
+{
+"title": "How to Make the Business Case for Slowing Down (and When Not To)",
+"truth": [
+"職場"
+],
+"src": "DEV",
+"rawTags": [
+"engineeringmanagement",
+"leadership",
+"management",
+"career"
+]
+},
+{
+"title": "Is Claude taking control of my development skills? I went looking for proof.",
+"truth": [
+"AI",
+"職場",
+"開發工具"
+],
+"src": "DEV",
+"rawTags": [
+"ai",
+"career",
+"productivity",
+"programming"
+]
+},
+{
+"title": "A Day in the Life of Someone Who Just Wanted to Open LinkedIn in Peace",
+"truth": [
+"職場"
+],
+"src": "DEV",
+"rawTags": [
+"career",
+"socialmedia",
+"watercooler"
+]
+},
+{
+"title": "I'd stopped reviewing the basics, so I built a small site to practice them",
+"truth": [
+"前端",
+"職場",
+"開源"
+],
+"src": "DEV",
+"rawTags": [
+"showdev",
+"webdev",
+"career",
+"opensource"
+]
+},
+{
+"title": "Update, things are coming together.",
+"truth": [
+"AI",
+"職場"
+],
+"src": "DEV",
+"rawTags": [
+"ai",
+"career",
+"discuss",
+"development"
+]
+},
+{
+"title": "How I landed a dev job with no degree",
+"truth": [
+"職場",
+"前端"
+],
+"src": "DEV",
+"rawTags": [
+"career",
+"beginners",
+"webdev",
+"discuss"
+]
+},
+{
+"title": "AI wrote the first 90% of my app in an afternoon. The last 10% took three weeks.",
+"truth": [
+"AI",
+"前端",
+"職場"
+],
+"src": "DEV",
+"rawTags": [
+"ai",
+"webdev",
+"career",
+"programming"
+]
+},
+{
+"title": "I deleted 2,000 lines of code and shipped zero new features. It was the best thing I did all year.",
+"truth": [
+"前端",
+"職場"
+],
+"src": "DEV",
+"rawTags": [
+"webdev",
+"programming",
+"career",
+"discuss"
+]
+},
+{
+"title": "Ghost in the Shell: Can a Log File Hijack an AI?",
+"truth": [
+"AI",
+"資安"
+],
+"src": "DEV",
+"rawTags": [
+"ai",
+"security",
+"halloween",
+"promptengineering"
+]
+},
+{
+"title": "WebMCP Attack Lab: Can an E-Shop Hijack Your AI Agent?",
+"truth": [
+"AI",
+"前端",
+"資安"
+],
+"src": "DEV",
+"rawTags": [
+"ai",
+"webmcp",
+"angular",
+"security"
+]
+},
+{
+"title": "The Most Embarrassing Private Key in Web PKI History",
+"truth": [
+"資安",
+"前端",
+"雲端",
+"AI"
+],
+"src": "DEV",
+"rawTags": [
+"security",
+"webdev",
+"devops",
+"ai"
+]
+},
+{
+"title": "Codex Was Torching Your SSD and Nobody Noticed for Months",
+"truth": [
+"資安",
+"雲端",
+"開發工具"
+],
+"src": "DEV",
+"rawTags": [
+"codex",
+"security",
+"devops",
+"productivity"
+]
+},
+{
+"title": "One Markdown File Can Hijack Your AI Coding Agent: The Hidden Cost of Blindly Trusting AGENTS.md",
+"truth": [
+"AI",
+"前端",
+"資安"
+],
+"src": "DEV",
+"rawTags": [
+"ai",
+"webdev",
+"programming",
+"security"
+]
+},
+{
+"title": "Your secrets don't need a git commit to leak into an AI tool",
+"truth": [
+"資安",
+"AI"
+],
+"src": "DEV",
+"rawTags": [
+"security",
+"ai",
+"programming",
+"discuss"
+]
+},
+{
+"title": "\"Mandatory user verification\" on DEV is a scam. Here's how to spot it in 30 seconds.",
+"truth": [
+"資安",
+"前端"
+],
+"src": "DEV",
+"rawTags": [
+"security",
+"discuss",
+"webdev",
+"beginners"
+]
+},
+{
+"title": "Hours, Not Weeks: How AI Rewrote the Clock of Software Security",
+"truth": [
+"資安",
+"AI"
+],
+"src": "DEV",
+"rawTags": [
+"security",
+"ai",
+"startup",
+"discuss"
+]
+},
+{
+"title": "When to Skip Your Gem Cooldown",
+"truth": [
+"語言",
+"資安"
+],
+"src": "DEV",
+"rawTags": [
+"bundler",
+"rubygems",
+"ruby",
+"security"
+]
+},
+{
+"title": "Your AI Agent Trusts Everything It Reads — A Field Guide to Hijacking Claude, GPT, Gemini & Copilot",
+"truth": [
+"資安",
+"AI"
+],
+"src": "DEV",
+"rawTags": [
+"security",
+"llm",
+"cybersecurity",
+"discuss"
+]
+},
+{
+"title": "Claude Code was mailing your email address to every website it visited: the User-Agent leak, the 5-month system-prompt issue, and the 5-point check",
+"truth": [
+"資安",
+"AI"
+],
+"src": "DEV",
+"rawTags": [
+"security",
+"ai",
+"privacy",
+"agents"
+]
+},
+{
+"title": "Google AI Classroom Part 4: Defeating Proxy Attendance & Lab Keyloggers with WebAuthn Passkeys, Rotating HMAC QRs & GCIP Blocking Functions",
+"truth": [
+"資安",
+"雲端"
+],
+"src": "DEV",
+"rawTags": [
+"security",
+"passkeys",
+"webauthn",
+"googlecloud"
+]
+},
+{
+"title": "What unshare -n leaves behind: building a boundary for an AI recon agent",
+"truth": [
+"資安",
+"系統",
+"AI"
+],
+"src": "DEV",
+"rawTags": [
+"security",
+"linux",
+"ai",
+"testing"
+]
+},
+{
+"title": "Breach Week Dropped 10 'Patch Now' Posts. A Local Gemma Boiled Them Down to 2 Lines, and Code Checked Every Number It Wrote.",
+"truth": [
+"資安"
+],
+"src": "DEV",
+"rawTags": [
+"devchallenge",
+"hf26challenge",
+"temporal",
+"security"
+]
+},
+{
+"title": "Prompt injection isn't a prompt problem. It's an authorization problem.",
+"truth": [
+"AI",
+"資安"
+],
+"src": "DEV",
+"rawTags": [
+"ai",
+"security",
+"discuss",
+"codereview"
+]
+},
+{
+"title": "Thank you to everyone who pointed out the phishing posts we got yesterday. We're working on improved mechanisms to automatically reject those types of attacks.",
+"truth": [
+"資安"
+],
+"src": "DEV",
+"rawTags": [
+"cybersecurity",
+"infosec",
+"security"
+]
+},
+{
+"title": "Patch Your PHP: What PHP2Shell Means for WordPress Sites",
+"truth": [
+"語言",
+"資安"
+],
+"src": "DEV",
+"rawTags": [
+"php",
+"security",
+"wordpress",
+"cve"
+]
+},
+{
+"title": "Your Login Works. Now Prove Who Did What",
+"truth": [
+"資安",
+"前端"
+],
+"src": "DEV",
+"rawTags": [
+"keycloak",
+"security",
+"saas",
+"webdev"
+]
+},
+{
+"title": "I built an AWS agent that scores any GitHub repo before you clone it",
+"truth": [
+"雲端",
+"AI",
+"資安"
+],
+"src": "DEV",
+"rawTags": [
+"aws",
+"ai",
+"security",
+"discuss"
+]
+},
+{
+"title": "Your AI code reviewer isn't a second opinion. It may be the first opinion again.",
+"truth": [
+"資安",
+"AI"
+],
+"src": "DEV",
+"rawTags": [
+"codereview",
+"security",
+"ai",
+"discuss"
+]
+},
+{
+"title": "Are You a Python Developer or a Python Expert? 7 Tests I Failed Building 3 Desktop Apps",
+"truth": [
+"語言",
+"資安"
+],
+"src": "DEV",
+"rawTags": [
+"python",
+"security",
+"programming",
+"tutorial"
+]
+},
+{
+"title": "Your App Will Meet a Freeze. Design for It",
+"truth": [
+"資安",
+"前端"
+],
+"src": "DEV",
+"rawTags": [
+"fintech",
+"security",
+"blockchain",
+"webdev"
+]
+},
+{
+"title": "Your Agent Has a Side Door: Testing MCP Policy Beyond the Tool List",
+"truth": [
+"AI",
+"資安"
+],
+"src": "DEV",
+"rawTags": [
+"ai",
+"mcp",
+"security",
+"automation"
+]
+},
+{
+"title": "Can a research review leave a checkable record? Help me break this draft.",
+"truth": [
+"資安",
+"語言",
+"開源"
+],
+"src": "DEV",
+"rawTags": [
+"security",
+"cryptography",
+"python",
+"opensource"
+]
+},
+{
+"title": "Who Checks the Tests When an Agent Rewrites the Code?",
+"truth": [
+"AI",
+"資安"
+],
+"src": "DEV",
+"rawTags": [
+"ai",
+"security",
+"testing",
+"softwareengineering"
+]
+},
+{
+"title": "Don't Write Markdown Files for Your Coding Agent. Write Scripts.",
+"truth": [
+"AI",
+"雲端",
+"開發工具"
+],
+"src": "DEV",
+"rawTags": [
+"ai",
+"programming",
+"devops",
+"productivity"
+]
+},
+{
+"title": "Nothing Reported It",
+"truth": [
+"AI",
+"雲端"
+],
+"src": "DEV",
+"rawTags": [
+"ai",
+"testing",
+"programming",
+"devops"
+]
+},
+{
+"title": "Building RailPulse AI: Deploying an Open-Source Railway Dispatch Agent with Gemma and Google Cloud Run",
+"truth": [
+"AI",
+"語言",
+"雲端"
+],
+"src": "DEV",
+"rawTags": [
+"ai",
+"python",
+"programming",
+"devops"
+]
+},
+{
+"title": "I lost half a day to an n8n workflow that was \"working.\" It never ran.",
+"truth": [
+"雲端"
+],
+"src": "DEV",
+"rawTags": [
+"n8n",
+"aws",
+"devops",
+"discuss"
+]
+},
+{
+"title": "Never Put a Pet on an AWS Spot Instance",
+"truth": [
+"雲端"
+],
+"src": "DEV",
+"rawTags": [
+"devops",
+"aws",
+"cloud"
+]
+},
+{
+"title": "I Fixed The Bug. Then My Pipeline Refused to Run.",
+"truth": [
+"雲端"
+],
+"src": "DEV",
+"rawTags": [
+"devops",
+"gitlab",
+"cicd",
+"beginners"
+]
+},
+{
+"title": "SlothSRE (NapOps): An Overnight Gemma 4 & ADK Agent That Compresses 418 Lines of 3 AM Alerts into a 2-Line Morning Digest",
+"truth": [
+"AI",
+"語言",
+"雲端"
+],
+"src": "DEV",
+"rawTags": [
+"ai",
+"python",
+"devops",
+"programming"
+]
+},
+{
+"title": "You tried git-lrc. Meet LiveReview 👀",
+"truth": [
+"AI",
+"開源",
+"雲端"
+],
+"src": "DEV",
+"rawTags": [
+"ai",
+"codereview",
+"opensource",
+"devops"
+]
+},
+{
+"title": "Shipping Flutter Web to Firebase When Your GitHub Actions Budget Hits Zero",
+"truth": [
+"行動",
+"前端",
+"雲端"
+],
+"src": "DEV",
+"rawTags": [
+"flutter",
+"firebase",
+"webdev",
+"devops"
+]
+},
+{
+"title": "Stop Generating Changelogs from Git Commits: How I Fixed the 'WHY' Problem in ChangelogBot",
+"truth": [
+"雲端",
+"開發工具",
+"開源",
+"前端"
+],
+"src": "DEV",
+"rawTags": [
+"devops",
+"github",
+"opensource",
+"typescript"
+]
+},
+{
+"title": "Day 82: A Password Removed and a Copy That Stayed Put",
+"truth": [
+"雲端"
+],
+"src": "DEV",
+"rawTags": [
+"devops",
+"ansible",
+"azure",
+"automation"
+]
+},
+{
+"title": "The cheapest GitHub Actions runners in 2026: what 100,000 minutes cost",
+"truth": [
+"雲端",
+"開源"
+],
+"src": "DEV",
+"rawTags": [
+"githubactions",
+"devops",
+"aws",
+"opensource"
+]
+},
+{
+"title": "Kubernetes 1.35's kubelet refuses to start on a cgroup v1 host by default",
+"truth": [
+"雲端",
+"系統"
+],
+"src": "DEV",
+"rawTags": [
+"kubernetes",
+"devops",
+"containers",
+"linux"
+]
+},
+{
+"title": "The software lifecycle was built for human pace. AI broke it twice.",
+"truth": [
+"AI",
+"雲端"
+],
+"src": "DEV",
+"rawTags": [
+"ai",
+"devops",
+"softwareengineering",
+"architecture"
+]
+},
+{
+"title": "Your Database Has Backups. Have You Ever Tried Restoring One?",
+"truth": [
+"後端",
+"雲端",
+"前端"
+],
+"src": "DEV",
+"rawTags": [
+"database",
+"devops",
+"webdev",
+"discuss"
+]
+},
+{
+"title": "Python 3.14's concurrent.interpreters module turns a 3.6-second GIL bottleneck into 0.9 seconds",
+"truth": [
+"語言",
+"雲端"
+],
+"src": "DEV",
+"rawTags": [
+"python",
+"performance",
+"programming",
+"devops"
+]
+},
+{
+"title": "Stop Trusting npm Scans: Run Untrusted Packages in an Isolated AWS Sandbox",
+"truth": [
+"雲端",
+"AI"
+],
+"src": "DEV",
+"rawTags": [
+"aws",
+"ai",
+"discuss",
+"devops"
+]
+},
+{
+"title": "Actual curl rewrites in rust",
+"truth": [
+"語言"
+],
+"src": "Lobsters",
+"rawTags": [
+"rust"
+]
+},
+{
+"title": "Java4Shell: Write once, RCE everywhere",
+"truth": [
+"語言",
+"資安"
+],
+"src": "Lobsters",
+"rawTags": [
+"java",
+"security"
+]
+},
+{
+"title": "Phrack 73",
+"truth": [
+"資安"
+],
+"src": "Lobsters",
+"rawTags": [
+"release",
+"security"
+]
+},
+{
+"title": "Redict is deprecated",
+"truth": [
+"後端"
+],
+"src": "Lobsters",
+"rawTags": [
+"databases"
+]
+},
+{
+"title": "How to Bypass Rust's Orphan Rule",
+"truth": [
+"語言"
+],
+"src": "Lobsters",
+"rawTags": [
+"rust"
+]
+},
+{
+"title": "FreeBSD GUS",
+"truth": [
+"系統"
+],
+"src": "Lobsters",
+"rawTags": [
+"freebsd",
+"mac"
+]
+},
+{
+"title": "Nimony: The next version of Nim",
+"truth": [
+"語言"
+],
+"src": "Lobsters",
+"rawTags": [
+"compilers",
+"programming"
+]
+},
+{
+"title": "Sarasa Gothic Mono",
+"truth": [
+"語言"
+],
+"src": "Lobsters",
+"rawTags": [
+"design",
+"programming"
+]
+},
+{
+"title": "Program-as-Weights: A Programming Paradigm for Fuzzy Functions",
+"truth": [
+"AI"
+],
+"src": "Lobsters",
+"rawTags": [
+"ai"
+]
+},
+{
+"title": "How Rust Changed Me As A Developer",
+"truth": [
+"語言"
+],
+"src": "Lobsters",
+"rawTags": [
+"performance",
+"rust"
+]
+},
+{
+"title": "C’s designated initializers give us named arguments",
+"truth": [
+"語言"
+],
+"src": "Lobsters",
+"rawTags": [
+"c",
+"programming"
+]
+},
+{
+"title": "Automatic Checking of Compiler Correctness with E-Graphs",
+"truth": [
+"語言"
+],
+"src": "Lobsters",
+"rawTags": [
+"compilers",
+"formalmethods"
+]
+},
+{
+"title": "Sexp Matrix",
+"truth": [
+"語言"
+],
+"src": "Lobsters",
+"rawTags": [
+"clojure",
+"lisp"
+]
+},
+{
+"title": "Improving the Wii U's Wii Mode",
+"truth": [
+"硬體"
+],
+"src": "Lobsters",
+"rawTags": [
+"graphics",
+"hardware",
+"reversing"
+]
+},
+{
+"title": "Critical Red Hat Quay Flaw Lets Attackers Read and Overwrite All Private Container Images in a Registry",
+"truth": [
+"資安"
+],
+"src": "Lobsters",
+"rawTags": [
+"security"
+]
+},
+{
+"title": "What is w2rt6byl5nf1opmc-a[.]com?",
+"truth": [
+"前端"
+],
+"src": "Lobsters",
+"rawTags": [
+"web"
+]
+},
+{
+"title": "Janet Reno was talking about my friend Coolio (computer criminal)",
+"truth": [
+"職場",
+"資安"
+],
+"src": "Lobsters",
+"rawTags": [
+"culture",
+"security"
+]
+},
+{
+"title": "On Leaving Swift for Rust",
+"truth": [
+"行動",
+"語言"
+],
+"src": "Lobsters",
+"rawTags": [
+"mobile",
+"rust",
+"swift"
+]
+},
+{
+"title": "Making Games in Go: Entity Component System (ECS)",
+"truth": [
+"語言"
+],
+"src": "Lobsters",
+"rawTags": [
+"games",
+"go"
+]
+},
+{
+"title": "Migrating from GitHub to Codeberg",
+"truth": [
+"語言",
+"開發工具"
+],
+"src": "Lobsters",
+"rawTags": [
+"programming",
+"vcs"
+]
+},
+{
+"title": "Vx32: Lightweight User-level Sandboxing on the x86 (2008)",
+"truth": [
+"資安"
+],
+"src": "Lobsters",
+"rawTags": [
+"osdev",
+"pdf",
+"security"
+]
+},
+{
+"title": "Goodbye Google",
+"truth": [
+"AI"
+],
+"src": "Lobsters",
+"rawTags": [
+"ai",
+"person"
+]
+},
+{
+"title": "Remembering Johannes Doerfert",
+"truth": [
+"職場"
+],
+"src": "Lobsters",
+"rawTags": [
+"culture"
+]
+},
+{
+"title": "File Notification Attacks: Side-Channel Leakage from the File-Notification System on Linux, Android, Windows, and macOS",
+"truth": [
+"資安"
+],
+"src": "Lobsters",
+"rawTags": [
+"security"
+]
+},
+{
+"title": "Pencils Down, Eyes Open: A Rails Developer After Rails World",
+"truth": [
+"語言"
+],
+"src": "Lobsters",
+"rawTags": [
+"ruby",
+"rust",
+"vibecoding"
+]
+},
+{
+"title": "Launching FreeBSD/EC2 desktop AMIs",
+"truth": [
+"系統"
+],
+"src": "Lobsters",
+"rawTags": [
+"freebsd"
+]
+},
+{
+"title": "Introducing Lev",
+"truth": [
+"語言"
+],
+"src": "Lobsters",
+"rawTags": [
+"clojure",
+"vibecoding"
+]
+},
+{
+"title": "Platform-independent SIMD in Go",
+"truth": [
+"語言"
+],
+"src": "Lobsters",
+"rawTags": [
+"go"
+]
+},
+{
+"title": "SourceHut account takeover via build logs (XSS in ansi2html.py)",
+"truth": [
+"資安"
+],
+"src": "Lobsters",
+"rawTags": [
+"security"
+]
+},
+{
+"title": "Running Pixelflut on a 2010 router",
+"truth": [
+"硬體"
+],
+"src": "Lobsters",
+"rawTags": [
+"hardware",
+"visualization"
+]
+},
+{
+"title": "FLIP Fluid on Flip Dots",
+"truth": [
+"硬體"
+],
+"src": "Lobsters",
+"rawTags": [
+"hardware",
+"video"
+]
+},
+{
+"title": "Topcoat is pushing the boundary of server applications with Rust",
+"truth": [
+"語言"
+],
+"src": "Lobsters",
+"rawTags": [
+"rust",
+"vibecoding"
+]
+},
+{
+"title": "ESA Open Source Policy",
+"truth": [
+"政策"
+],
+"src": "Lobsters",
+"rawTags": [
+"law"
+]
+},
+{
+"title": "Massive Parallel Imports in Neo4j Without Deadlock and Lock Contention",
+"truth": [
+"後端"
+],
+"src": "Lobsters",
+"rawTags": [
+"databases"
+]
+},
+{
+"title": "F-Droid 2.0",
+"truth": [
+"行動"
+],
+"src": "Lobsters",
+"rawTags": [
+"android"
+]
+},
+{
+"title": "Enhanced Spell Checking on the Web",
+"truth": [
+"前端"
+],
+"src": "Lobsters",
+"rawTags": [
+"web"
+]
+},
+{
+"title": "Track GPU Availability Cloud Capacity",
+"truth": [
+"語言"
+],
+"src": "Lobsters",
+"rawTags": [
+"programming"
+]
+},
+{
+"title": "Apple's Two-Tier Encryption in the UK",
+"truth": [
+"行動",
+"資安"
+],
+"src": "Lobsters",
+"rawTags": [
+"ios",
+"privacy"
+]
+},
+{
+"title": "RAM: the forgotten history",
+"truth": [
+"硬體"
+],
+"src": "Lobsters",
+"rawTags": [
+"hardware"
+]
+},
+{
+"title": "We Have Named Arguments at Home",
+"truth": [
+"語言"
+],
+"src": "Lobsters",
+"rawTags": [
+"rust"
+]
+}
+]
+}

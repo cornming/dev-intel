@@ -37,7 +37,7 @@ test('tagsFor：預期命中的標籤（標題 → 必含標籤）', () => {
     ['美國多家銀行App傳出服務異常，內部系統軟體臭蟲造成交易延遲', ['行動', '開發工具']],
     ['我的面試心得與薪資談判', ['職場']],
     ['Software engineer layoffs and the job market in 2026', ['職場']],
-    ['Apple調整macOS App權限管理', ['系統', '行動']],
+    ['Apple調整macOS App權限管理', ['系統']],   // 桌面 App 不是行動
     ['Qwen4-Max 任務成本降約六成', ['AI']],
     ['You won\'t win at copyright', ['政策']],
   ];
@@ -240,4 +240,73 @@ test('dropSharedImages：同來源 3 則以上共用同一張圖視為預設圖�
   assert.deepEqual(items.map((x) => x.image), [null, null, null, 'https://x/own.jpg', 'https://x/default.jpg', 'https://x/two.jpg', 'https://x/two.jpg', null]);
   assert.ok(items.slice(0, 3).every((x) => x.imgChecked), '已判定為預設圖的不要再重抓');
   assert.equal(dropSharedImages(items), 0, '重複執行不會再變動');
+});
+
+test('tagsFor：結尾是符號的詞（.NET、C#、C++）要能辨識——\\b 邊界做不到這點', () => {
+  assert.ok(tagsFor('換一台電腦，快速建立 Nuxt 3 + .NET 8 開發環境').includes('語言'));
+  assert.ok(tagsFor('C# 與 C++ 的差別').includes('語言'));
+  assert.ok(tagsFor('Why F# still matters').includes('語言'));
+  assert.ok(tagsFor('ASP.NET Core 入門').includes('語言'));
+});
+
+test('tagsFor：網路類別（台灣技術文章常見的 tcpdump／MTU／DNS／SMTP）', () => {
+  for (const t of ['MTU 設 1500，tcpdump 為什麼會顯示 length 28960？', 'PTR nslookup 反解授權查詢命令', 'SMTP 是什麼？一封 Email 是怎麼寄出去的', 'Linux 有兩張網卡，回程走哪張？用 ip route get 查 IPv4 出口', 'How DNS resolvers work', 'HTTP/3 and QUIC explained']) assert.ok(tagsFor(t).includes('網路'), t);
+});
+
+test('tagsFor：已修掉的誤判不再出現', () => {
+  const no = (title, tag) => assert.ok(!tagsFor(title).includes(tag), `「${title}」不該有 ${tag}，實際 [${tagsFor(title)}]`);
+  no('Tesla 砸 30 億歐元擴建柏林超級工廠！Cybercab 2029 年投產', '資安');   // cyber\w* 曾把 Cybercab 當資安
+  no('Ghost in the Shell: the movie', '開發工具');                          // shell 曾被當開發工具
+  no('Hunting a memory leak in Rust', '資安');                                // memory leak 不是資安
+  no('Taylor Swift announces a new tour', '語言');                            // swift 語言
+  no('A neural network for image classification', '網路');                    // neural network 不是網路
+  no('Social network effects in startups', '網路');
+  no('Don\'t Be a Proxy Between Me and Your AI', '網路');                     // proxy 慣用語
+  no('My app stopped working after the update', '行動');                      // app 不等於行動
+  no('Anthropic offers new enterprise plans', '職場');                        // offers 不等於職場
+  no('Apple Services Down', '行動');
+  assert.ok(tagsFor('美國多家銀行App傳出服務異常').includes('行動'), '中文緊貼 App 仍視為行動');
+});
+
+import { readFileSync } from 'node:fs';
+const fixture = (name) => JSON.parse(readFileSync(new URL(`./fixtures/${name}`, import.meta.url), 'utf8')).items;
+
+test('標籤品質（人工標註 75 則）：召回率 ≥ 95%，且不得出現「不該有」的標籤', () => {
+  let want = 0, hit = 0; const bad = [];
+  for (const x of fixture('tag-manual.json')) {
+    const p = new Set(tagsFor(x.title));
+    for (const t of x.want ?? []) { want++; if (p.has(t)) hit++; }
+    for (const t of x.not ?? []) if (p.has(t)) bad.push(`${x.title} 不該有 ${t}`);
+    if (x.empty && p.size) bad.push(`${x.title} 應為空卻有 [${[...p]}]`);
+  }
+  assert.deepEqual(bad, []);
+  assert.ok(hit / want >= 0.95, `召回率 ${Math.round((hit / want) * 100)}%（${hit}/${want}）低於 95%`);
+});
+
+test('標籤品質（銀標準 207 則，來源作者自貼的標籤）：召回率不退步、精確率下限不退步', () => {
+  let tp = 0, fn = 0, fp = 0;
+  for (const x of fixture('tag-silver.json')) {
+    const p = new Set(tagsFor(x.title)), truth = new Set(x.truth);
+    for (const t of truth) p.has(t) ? tp++ : fn++;
+    for (const t of p) if (!truth.has(t)) fp++;
+  }
+  const recall = tp / (tp + fn), precision = tp / (tp + fp);
+  // 門檻設在目前水準略下方：銀標準不完整（作者不會把每個主題都貼上），所以精確率只是下限
+  assert.ok(recall >= 0.36, `召回率 ${Math.round(recall * 100)}% 退步（基線 38%）`);
+  assert.ok(precision >= 0.75, `精確率下限 ${Math.round(precision * 100)}% 退步（基線 77%）`);
+});
+
+test('mergeHistory：保留的舊項目用目前規則重算標籤，舊標籤當備援；職場來源以職場開頭，最多 3 個', () => {
+  const now = Date.parse('2026-11-18T00:00:00Z');
+  const prev = [
+    { id: 'a', title: 'Nvidia Chair says board will not reinstate CEO', tags: [], firstSeen: '2026-11-17T12:00:00Z' },
+    { id: 'b', title: '完全沒有關鍵字的標題', tags: ['AI'], firstSeen: '2026-11-17T12:00:00Z' },               // 舊標籤（可能來自來源自帶）要保留
+    { id: 'c', title: 'Rust 與 Python 與 Linux 與 AWS 與 React', tags: [], kind: 'job', firstSeen: '2026-11-17T12:00:00Z' },
+  ];
+  const by = Object.fromEntries(mergeHistory(prev, [], now).map((x) => [x.id, x]));
+  assert.deepEqual(by.a.tags, ['硬體']);
+  assert.deepEqual(by.b.tags, ['AI']);
+  assert.equal(by.c.tags[0], '職場');
+  assert.equal(by.c.tags.length, 3);
+  assert.ok(by.a.stale && by.b.stale);
 });

@@ -1,0 +1,468 @@
+{
+ "note": "人工標註（在調整規則之前完成）：want=應有的標籤、not=不該有的標籤、empty=不屬於技術主題。標題取自 2026-11-18 的實際資料。",
+ "items": [
+  {
+   "title": "myIP 工具，網化數位 Ken，免費 Windows 工具，ipconfig，Ping，DNS，TCP，Speedtest",
+   "want": [
+    "網路",
+    "系統"
+   ]
+  },
+  {
+   "title": "(15) 研發看 MES：HOLD － 生產發現異常，怎麼把 Lot 停下來？",
+   "empty": 1
+  },
+  {
+   "title": "Linux 有兩張網卡，回程走哪張？用 ip route get 查 IPv4 出口",
+   "want": [
+    "網路",
+    "系統"
+   ]
+  },
+  {
+   "title": "AI 爬蟲到底讀得到你的網站嗎？2024 年的實測2026 年的控制選項，以及三個自己量的方法",
+   "want": [
+    "AI"
+   ]
+  },
+  {
+   "title": "(4)從 AI 擷取到 CSV 匯出，用 JavaScript 完成產品規格比較器",
+   "want": [
+    "AI",
+    "前端"
+   ]
+  },
+  {
+   "title": "MTU 設 1500，tcpdump 為什麼會顯示 length 28960？",
+   "want": [
+    "網路"
+   ]
+  },
+  {
+   "title": "陪我一起讀ML L3- 98% 準確率的雜訊模型：資料洩漏",
+   "want": [
+    "AI"
+   ],
+   "not": [
+    "資安"
+   ]
+  },
+  {
+   "title": "(3)不用每個欄位都寫死，用 Bigram Dice 比對產品規格名稱",
+   "empty": 1
+  },
+  {
+   "title": "(2) AI 抽出的規格名稱不一樣？用 JavaScript 自動對齊產品欄位",
+   "want": [
+    "AI",
+    "前端"
+   ]
+  },
+  {
+   "title": "(1)不用爬蟲也能做產品規格比較？用 Gemini API 將網頁文字轉成 JSON",
+   "want": [
+    "AI"
+   ]
+  },
+  {
+   "title": "(14) 研發看 MES：出站－完成一道製程之後發生什麼？",
+   "empty": 1
+  },
+  {
+   "title": "PTR nslookup 反解授權查詢命令",
+   "want": [
+    "網路"
+   ]
+  },
+  {
+   "title": "Cloudmax 匯智資訊註冊，DNS代管，網域代管，設定 SPF，DMARC，DKIM，參考設定畫面",
+   "want": [
+    "網路"
+   ]
+  },
+  {
+   "title": "連初入行的工程師都會使用的 SNMP Tester Get OIDs",
+   "want": [
+    "網路"
+   ]
+  },
+  {
+   "title": "換一台電腦，快速建立 Nuxt 3 + .NET 8 開發環境",
+   "want": [
+    "前端",
+    "語言"
+   ]
+  },
+  {
+   "title": "SMTP 是什麼？一封 Email 是怎麼寄出去的",
+   "want": [
+    "網路"
+   ]
+  },
+  {
+   "title": "AI 時代該轉行開發Agent? 但我反而看好後端和 Infra？",
+   "want": [
+    "AI",
+    "後端",
+    "職場"
+   ]
+  },
+  {
+   "title": "Nuxt 前端框架，還有 Server Middleware？從 HTTP 安全標頭開始和 nosniff",
+   "want": [
+    "前端",
+    "資安",
+    "網路"
+   ]
+  },
+  {
+   "title": "C#、.NET、ASP.NET Core 到底差在哪？搞懂三者的關係",
+   "want": [
+    "語言"
+   ]
+  },
+  {
+   "title": "Nuxt 的檔案式路由，pages 裡放一個檔案，就能產生網址",
+   "want": [
+    "前端"
+   ]
+  },
+  {
+   "title": "原來 Component 不只是積木，搞懂 Vue 的 Props 與 Emit",
+   "want": [
+    "前端"
+   ]
+  },
+  {
+   "title": "Outlook 2016 無法收信？Windows Update 明明是最新",
+   "want": [
+    "系統"
+   ]
+  },
+  {
+   "title": "AI 時代該轉職嗎？麥肯錫：2035 年前 1,100 萬人得換跑道",
+   "want": [
+    "AI",
+    "職場"
+   ]
+  },
+  {
+   "title": "轉生為軟體工程師兩年以後的我：離開舒適圈，重新定義工程師價值",
+   "want": [
+    "職場"
+   ]
+  },
+  {
+   "title": "轉職軟體工程師之前或許你該知道的產業地圖",
+   "want": [
+    "職場"
+   ]
+  },
+  {
+   "title": "轉職分享: 產品工程師到客製化電路設計",
+   "want": [
+    "職場"
+   ]
+  },
+  {
+   "title": "Danfoss冷凍控制器傳出6個未修補漏洞，攻擊者可未經身分驗證遠端取得控制權",
+   "want": [
+    "資安"
+   ]
+  },
+  {
+   "title": "研究人員公布OpenJDK重大漏洞Java4Shell細節",
+   "want": [
+    "資安",
+    "語言"
+   ]
+  },
+  {
+   "title": "Gemini對話保留期將由72小時延長為2個月",
+   "want": [
+    "AI"
+   ]
+  },
+  {
+   "title": "Mozilla發布Firefox 160.0.1，緊急修補兩個高風險漏洞",
+   "want": [
+    "資安",
+    "前端"
+   ]
+  },
+  {
+   "title": "微軟推出7款自研AI模型，以低價挑戰OpenAI及Anthropic",
+   "want": [
+    "AI"
+   ]
+  },
+  {
+   "title": "Optimizely供應鏈攻擊波及BBC、GitLab、IKEA等178個組織網站，匯豐臺灣也名列其中",
+   "want": [
+    "資安"
+   ]
+  },
+  {
+   "title": "Nvidia營收翻倍，黃仁勳首度表態願回任Nvidia執行長",
+   "want": [
+    "硬體",
+    "產業"
+   ]
+  },
+  {
+   "title": "Redshift支援Iceberg資料表多陳述式交易，避免讀取未完成更新",
+   "want": [
+    "雲端",
+    "後端"
+   ]
+  },
+  {
+   "title": "駭客利用Microsoft 365當機事件發動釣魚攻擊，謊稱郵件將遭刪除誘騙點擊連結",
+   "want": [
+    "資安"
+   ]
+  },
+  {
+   "title": "AI加速嵌入式設備漏洞挖掘，研究人員90小時找出66項TCP/IP協定堆疊新漏洞",
+   "want": [
+    "AI",
+    "資安",
+    "網路"
+   ]
+  },
+  {
+   "title": "Google揭駭客利用多代理AI框架發動攻擊，另有工具可自動發掘及利用漏洞",
+   "want": [
+    "AI",
+    "資安"
+   ]
+  },
+  {
+   "title": "Arara郵件服務遭駭，日本大阪市確認逾107萬筆電子郵件地址外洩",
+   "want": [
+    "資安"
+   ]
+  },
+  {
+   "title": "輝達發表 Rubin HPC：單顆 GPU 塞進逾 5 萬個 CUDA 核心，2028 年推出",
+   "want": [
+    "硬體"
+   ]
+  },
+  {
+   "title": "中國 AI 夢醒了，AI 明星企業股價暴跌七成",
+   "want": [
+    "AI",
+    "產業"
+   ]
+  },
+  {
+   "title": "輝達關鍵員工醞釀出走，內部信警告董事會：沒黃仁勳將失去「不可替代」的人才",
+   "want": [
+    "硬體"
+   ]
+  },
+  {
+   "title": "川普政府傳續推中國光模組禁令 美國光通訊股嗨",
+   "want": [
+    "政策"
+   ]
+  },
+  {
+   "title": "微軟 CEO 納德拉給工程師的 AI 時代生存忠告：多做少說，直接投入實戰",
+   "want": [
+    "AI",
+    "職場"
+   ]
+  },
+  {
+   "title": "輝達「AI 央行」生變？新雲端業者恐失融資管道",
+   "want": [
+    "AI",
+    "雲端"
+   ]
+  },
+  {
+   "title": "GPT-6.2 Astra / Sol 雙模型登場，更少的 token 搞定高難度任務",
+   "want": [
+    "AI"
+   ]
+  },
+  {
+   "title": "AI 需求旺 全球半導體銷售額連 5 個月「倍增」",
+   "want": [
+    "AI",
+    "硬體"
+   ]
+  },
+  {
+   "title": "向盜版與 AI 抄襲宣戰，Instagram 全新「內容保護」功能上線",
+   "want": [
+    "AI"
+   ]
+  },
+  {
+   "title": "輝達新加坡子公司營收衝上 1,040 億美元後，財報卻不再單獨揭露收入",
+   "want": [
+    "硬體",
+    "產業"
+   ]
+  },
+  {
+   "title": "黃仁勳辭後 NVIDIA 首份財報報喜，代理執行長透露：台積電才剛來訪",
+   "want": [
+    "硬體",
+    "產業"
+   ]
+  },
+  {
+   "title": "AI 代理如何走進企業日常？Google Cloud 從開發、治理到協作，打造企業落地解方",
+   "want": [
+    "AI",
+    "雲端"
+   ]
+  },
+  {
+   "title": "董事長回絕！黃仁勳辭任後首度公開發聲：董事會若認為合適願意回任 NVIDIA 執行長",
+   "want": [
+    "硬體"
+   ]
+  },
+  {
+   "title": "Tesla 砸 30 億歐元擴建柏林超級工廠！Cybercab 2029 年投產，年產能上看 100 萬輛",
+   "not": [
+    "資安"
+   ]
+  },
+  {
+   "title": "演算法不再紙上談兵：雲科大 AI 種子培訓，帶學生走進物流與製造現場解題",
+   "want": [
+    "AI"
+   ]
+  },
+  {
+   "title": "【個人 AI 代理還進不了公司】資安與成本風險未解，企業版代理人才是可行路徑",
+   "want": [
+    "AI",
+    "資安"
+   ]
+  },
+  {
+   "title": "ChatGPT 推薦後的品牌造訪，僅 8.8% 從 AI 點擊進站：IAB「歸因藍圖」先定義誰能爭功",
+   "want": [
+    "AI"
+   ]
+  },
+  {
+   "title": "【科技早餐】加州起訴 OpenAI！檢方指 AI 代理測試至少 80 次失控",
+   "want": [
+    "AI",
+    "政策"
+   ]
+  },
+  {
+   "title": "a16z、Clay 都設「生態系」職位：AI 內容越多，新創與創投為何越重視真人關係？",
+   "want": [
+    "AI",
+    "產業"
+   ]
+  },
+  {
+   "title": "機器人規格尚未定型，台廠如何搶得話語權？鴻海、華碩、Google 談場域新機會",
+   "want": [
+    "硬體"
+   ]
+  },
+  {
+   "title": "阿里巴巴稱 Qwen4-Max 任務成本降約六成，分析師：企業還要算重試與人工驗收",
+   "want": [
+    "AI"
+   ]
+  },
+  {
+   "title": "Java4Shell: RCE in OpenJDK when processing Base64",
+   "want": [
+    "資安",
+    "語言"
+   ]
+  },
+  {
+   "title": "Quad9's withdrawal from France: A canary in the coal mine",
+   "not": [
+    "開發工具"
+   ]
+  },
+  {
+   "title": "GPT‑6.2 Astra and Sol",
+   "want": [
+    "AI"
+   ]
+  },
+  {
+   "title": "Apple Services Down",
+   "not": [
+    "行動",
+    "資安"
+   ]
+  },
+  {
+   "title": "Nvidia stopped disclosing Singapore sales as revenues hit $104B",
+   "want": [
+    "硬體",
+    "產業"
+   ]
+  },
+  {
+   "title": "ID.me terms required for IRS sign-in"
+  },
+  {
+   "title": "Highly classified US national security communications network goes down"
+  },
+  {
+   "title": "MAI Code 2 and Code 2 Flash"
+  },
+  {
+   "title": "New Evidence Shows School Phone Bans Are Gradually Improving Test Scores",
+   "want": [
+    "政策"
+   ]
+  },
+  {
+   "title": "Phrack 73 Released",
+   "want": [
+    "資安"
+   ]
+  },
+  {
+   "title": "jQuery 4.1.0",
+   "want": [
+    "前端"
+   ]
+  },
+  {
+   "title": "Google's AI answers reducing search traffic by 40%",
+   "want": [
+    "AI"
+   ]
+  },
+  {
+   "title": "350 years ago, Ole Rømer discovered that light has a finite speed",
+   "empty": 1
+  },
+  {
+   "title": "Microsoft's ONNX Runtime has disappeared from GitHub",
+   "want": [
+    "開發工具"
+   ]
+  },
+  {
+   "title": "What is the best harness for each model?"
+  },
+  {
+   "title": "Solid 2.0",
+   "want": [
+    "前端"
+   ]
+  }
+ ]
+}

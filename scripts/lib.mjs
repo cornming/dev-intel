@@ -111,25 +111,77 @@ export function stripQuery(raw) {
 export const idFor = (url) => createHash('sha1').update(normalizeUrl(url)).digest('hex').slice(0, 12);
 
 // 關鍵字 → 主題標籤（大小寫不分）。
-// 英文一律用單字邊界 \b，避免 "ai" 命中 "maintain"；中文則直接比對詞。
+// 每條規則拆成「en」（英文詞，兩側要有邊界）與「zh」（中文詞，直接比對）。
+// 邊界用 (?<![A-Za-z0-9_]) 與 (?![A-Za-z0-9_]) 而不是 \b：\b 遇到結尾是符號的詞（.NET、C#、C++）永遠不成立；
+// 而且中文緊貼英文時（例如「銀行App」「AI代理」）仍然算有邊界。
 // 順序＝優先順序：每則最多保留 3 個標籤，排前面的先保留。
-// 刻意避免太籠統的詞（例如「工作」會誤中「工作負載」、"job" 會誤中 cron job）。
-const TAG_RULES = [
-  ['AI', /\b(ai|a\.i\.|llm|llms|gpt[\w-]*|claude|gemini|openai|anthropic|copilot|chatgpt|agentic|agents?|machine learning|deep learning|neural|diffusion|rag|mcp|qwen\d*|deepseek|llama|mistral|grok|prompts?|inference|fine-?tun\w*)\b|人工智慧|大型語言模型|生成式|AI ?代理|智慧體|大模型|機器學習|深度學習/i],
-  ['職場', /\b(careers?|hiring|layoffs?|salary|salaries|interviews?|resume|burnout|job (search|market|hunt|offer|interview)|remote work|promotion|onboarding|offers?)\b|面試|薪水|薪資|轉職|求職|裁員|資遣|職涯|職缺|工作機會|找工作|離職|加班|上班族/i],
-  ['資安', /\b(security|vulnerabilit\w*|cves?(-\d+)?|exploits?|rce|malware|ransomware|breach(es)?|zero-?days?|phishing|ddos|backdoor|cyber\w*|privacy|encryption|supply chain attack|phrack|tor)\b|資安|漏洞|駭客|惡意程式|勒索|外洩|釣魚|網路攻擊|資料遭|遭駭|隱私|加密/i],
-  ['雲端', /\b(aws|azure|gcp|cloud\w*|kubernetes|k8s|docker|containers?|serverless|terraform|devops|ci\/cd|sre|redshift|datacenters?)\b|雲端|容器|資料中心/i],
-  ['前端', /\b(javascript|typescript|js|ts|react|vue|svelte|solid(\.?js)?|angular|jquery|htmx|tailwind|vite|webpack|css|html|frontend|front-end|browsers?|chrome|firefox|safari|webassembly|wasm|node\.?js|deno|bun|next\.?js)\b|前端|瀏覽器/i],
-  ['後端', /\b(backend|back-end|apis?|databases?|postgres\w*|mysql|mariadb|sqlite|mongodb|redis|redict|kafka|microservices?|sql|graphql|iceberg|data (lake|warehouse))\b|資料庫|後端|資料倉儲/i],
-  ['語言', /\b(rust|golang|python|java|kotlin|swift|c\+\+|c#|\.net|zig|php|ruby|elixir|haskell|lua|nim|nimony|ocaml|scala|clojure|perl|lisp|compilers?|programming languages?)\b|\bgo (1\.\d+|modules?|routines?)\b|\bin go\b|\bc (language|standard|23|26)\b|\bc’s\b|java\d\w*|程式語言|編譯器/i],
-  ['行動', /\b(android|ios|ipados|flutter|react native|mobile|swiftui|jetpack|apps?)\b|行動應用|手機/i],
-  ['系統', /\b(windows|macos|linux|ubuntu|debian|kernel|bsd|firmware|operating systems?|unix)\b|作業系統|韌體/i],
-  ['開發工具', /\b(git|github|gitlab|vim|neovim|emacs|vscode|ide|editors?|cli|terminal|shell|debugg\w*|linters?|build systems?|package managers?|npm|pip|cargo|readme)\b|開發工具|開發者|程式碼|軟體臭蟲|\bbugs?\b/i],
-  ['開源', /\b(open[- ]source|oss|foss|licen[sc]es?|maintainers?|copyleft|gpl|hacktoberfest)\b|開源|開放原始碼/i],
-  ['硬體', /\b(nvidia|amd|intel|tsmc|chips?|semiconductors?|gpus?|cpus?|asic|fpga|robots?|robotics|drones?|iot|hardware|quantum)\b|輝達|晶片|半導體|台積電|機器人|無人機|伺服器|量子/i],
-  ['產業', /\b(revenues?|earnings|acquir\w*|acquisitions?|merger|ipo|valuation|funding|startups?|stocks?|antitrust|bitcoin|crypto\w*|blockchain)\b|營收|收購|併購|股價|目標價|財報|獲利|市值|募資|新創|比特幣|加密貨幣|區塊鏈/i],
-  ['政策', /\b(laws?|legal|lawsuits?|copyright|regulations?|bans?|gdpr|court|sues?|policy|government|congress|eu)\b|法規|法院|禁令|監管|法案|政府|出口管制|訴訟/i],
+// 原則：寧可漏標也不要亂標；避免太籠統的詞（「工作」、job、app、shell、offer、ip 等）。
+const RULES = [
+  ['AI', {
+    en: 'ai|a\\.i\\.|llms?|gpt[\\w-]*|claude|gemini|gemma|openai|anthropic|copilot|chatgpt|codex|agentic|agents?|machine learning|deep learning|ml|nlp|neural|diffusion|rag|mcp|qwen\\d*|deepseek|llama|mistral|grok|kimi|ollama|hugging ?face|transformers?|embeddings?|prompts?|inference|fine-?tun\\w*|lora|local models?|foundation models?|generative',
+    zh: '人工智慧|大型語言模型|生成式|AI ?代理|智慧體|大模型|機器學習|深度學習|語言模型',
+  }],
+  ['職場', {
+    en: 'careers?|hiring|layoffs?|salary|salaries|interviews?|resume|burnout|job (?:search|market|hunt|offers?|interview)|counter-?offer|offer letter|remote work|promotion|onboarding|mentor(?:ing|ship)?|(?:junior|senior|staff|principal) (?:software )?(?:engineers?|developers?|devs?)|engineering managers?|tech lead|workplace|work-life|coworkers?',
+    zh: '面試|薪水|薪資|轉職|求職|裁員|資遣|職涯|職缺|工作機會|找工作|離職|加班|上班族|升遷|加薪|新鮮人|履歷|轉行|工程師的',
+  }],
+  ['資安', {
+    en: 'security|vulnerabilit\\w*|cves?(?:-\\d+)?|exploit\\w*|rce|malware|ransomware|breach(?:es)?|zero-?days?|phishing|ddos|backdoor|cyber(?:security|attacks?|crime|criminals?|threats?)|privacy|encryption|supply chain attack|phrack|tor|attacks?|attackers?|hijack\\w*|(?<!memory )leak(?:s|ed|age)?|credentials?|secrets?|iam|sso|oauth|authenticat\\w*|authoriz\\w*|threats?|gdpr|osint|pentest\\w*|red team|blue team|sandbox\\w*|spoof\\w*|cryptograph\\w*|tls|ssl|firewalls?|fuzz\\w*|csrf|xss|nosniff',
+    zh: '資安|漏洞|駭客|惡意程式|勒索|外洩|釣魚|網路攻擊|資料遭|遭駭|隱私|加密|入侵|詐騙|零時差|供應鏈攻擊|身分驗證|攻擊者|安全標頭',
+  }],
+  ['雲端', {
+    en: 'aws|azure|gcp|cloud\\w*|kubernetes|k8s|docker|containers?|serverless|terraform|devops|ci\\/cd|sre|redshift|datacenters?|github actions|lambda|bedrock|ec2|vercel|netlify|cloudflare|helm|infrastructure as code|iac',
+    zh: '雲端|容器|資料中心|無伺服器',
+  }],
+  ['前端', {
+    en: 'javascript|typescript|js|ts|react|vue|nuxt|svelte|solid(?:\\.?js)?|angular|jquery|htmx|tailwind\\w*|vite|webpack|css|html|frontend|front-end|browsers?|chrome|firefox|safari|webassembly|wasm|webgpu|node\\.?js|deno|bun|next\\.?js|three\\.?js|wordpress|pwa|web (?:apps?|sites?|dev\\w*|pages?|components?)|webdev|ui|ux|browser extensions?|chrome extensions?',
+    zh: '前端|瀏覽器|網頁|網站設計',
+  }],
+  ['後端', {
+    en: 'backend|back-end|apis?|databases?|postgres\\w*|mysql|mariadb|sqlite|mongodb|redis|redict|kafka|microservices?|sql|graphql|iceberg|data (?:lakes?|warehouses?)|orm|message queues?|spring boot|django|flask|fastapi|laravel|rails|grpc|restful|server-?side|middleware',
+    zh: '資料庫|後端|資料倉儲|微服務',
+  }],
+  ['網路', {
+    en: 'networking|(?<!neural |social )networks?|tcp|udp|ipv[46]|ip (?:address|route|routing)|dns|https?|quic|vpn|bgp|routing|routers?|latency|bandwidth|packets?|tcpdump|wireshark|mtu|smtp|imap|nginx|(?:reverse|http|socks|web) prox(?:y|ies)|proxy servers?|cdn|websockets?|webrtc|wi-?fi|5g|ethernet|snmp|nslookup|dmarc|dkim|spf',
+    zh: '網路|封包|網卡|路由|頻寬|延遲|郵件伺服器|代理伺服器|反解',
+  }],
+  ['語言', {
+    en: 'rust|golang|python|java|kotlin|(?<!taylor )swift(?! (?:payment|code|bank))|c\\+\\+|c#|f#|\\.net|asp\\.net|dotnet|zig|php|ruby|elixir|haskell|lua|nim|nimony|ocaml|scala|clojure|perl|lisp|dart|jvm|powershell|compilers?|programming languages?|programming|go (?:1\\.\\d+|modules?|routines?)|in go|c (?:language|standard|23|26)|c’s|java\\d\\w*',
+    zh: '程式語言|編譯器|程式設計|寫程式',
+  }],
+  ['行動', {
+    en: 'android|ios|ipados|iphones?|ipads?|flutter|react native|swiftui|jetpack(?: compose)?|kotlin multiplatform|mobile(?: apps?| dev\\w*)?|(?:android|ios|iphone) apps?',
+    zh: '行動應用|手機|行動裝置|(?<=[\\u4e00-\\u9fff])app(?![a-z])',
+  }],
+  ['系統', {
+    en: 'windows|macos|linux|ubuntu|debian|fedora|nixos|nix|kernel|(?:free|open|net)?bsd|firmware|operating systems?|unix|systemd|wsl|gnome|kde|arch linux',
+    zh: '作業系統|韌體',
+  }],
+  ['開發工具', {
+    en: 'git|github|gitlab|vim|neovim|emacs|vscode|vs code|jetbrains|intellij|ide|editors?|cli|terminal|debugg\\w*|linters?|build systems?|package managers?|npm|pip|cargo|readme|pull requests?|code review|devtools|sdk|formatter',
+    zh: '開發工具|開發者|程式碼|軟體臭蟲|除錯|程式碼審查',
+  }],
+  ['開源', {
+    en: 'open[- ]source|oss|foss|licen[sc]es?|maintainers?|copyleft|gpl|hacktoberfest',
+    zh: '開源|開放原始碼',
+  }],
+  ['硬體', {
+    en: 'nvidia|amd|intel|tsmc|chips?|semiconductors?|gpus?|cpus?|asic|fpga|robots?|robotics|drones?|iot|hardware|quantum|rtx|raspberry pi|arduino|esp32|risc-v|sensors?|3d print\\w*',
+    zh: '輝達|晶片|半導體|台積電|機器人|無人機|伺服器|量子|感測器',
+  }],
+  ['產業', {
+    en: 'revenues?|earnings|acquir\\w*|acquisitions?|merger|ipo|valuation|funding|startups?|stocks?|antitrust|bitcoin|crypto\\w*|blockchain',
+    zh: '營收|收購|併購|股價|目標價|財報|獲利|市值|募資|新創|比特幣|加密貨幣|區塊鏈',
+  }],
+  ['政策', {
+    en: 'laws?|legal|lawsuits?|copyright|regulations?|bans?|gdpr|court|sues?|policy|government|congress|eu|fcc|ftc|doj',
+    zh: '法規|法院|禁令|監管|法案|政府|出口管制|訴訟|起訴',
+  }],
 ];
+
+const BEFORE = '(?<![A-Za-z0-9_])';
+const AFTER = '(?![A-Za-z0-9_])';
+export const TAG_RULES = RULES.map(([tag, { en, zh }]) => [tag, new RegExp(`${BEFORE}(?:${en})${AFTER}${zh ? `|${zh}` : ''}`, 'i')]);
 
 export function tagsFor(text = '') {
   return TAG_RULES.filter(([, re]) => re.test(text)).map(([t]) => t).slice(0, 3);
@@ -172,6 +224,13 @@ export function dedupe(items) {
 }
 
 // 上一輪抓到、這輪沒抓到的項目暫時保留（避免來源暫時故障時整區消失），超過 ttl 才移除
+// 被保留的舊項目沿用的是「抓取當時」的標籤；規則改過後要立刻生效，所以用目前規則重算並保留舊標籤當備援
+// （舊標籤可能含來源自帶的標籤，單看標題不一定找得回來）。職場來源的項目一律以「職場」開頭。
+export function retag(it) {
+  const merged = [...(it.kind === 'job' ? ['職場'] : []), ...tagsFor(it.title ?? ''), ...(it.tags ?? [])];
+  return [...new Set(merged)].slice(0, 3);
+}
+
 export function mergeHistory(prev = [], fresh = [], now = Date.now(), ttlMs = 72 * 36e5) {
   const nowIso = new Date(now).toISOString();
   const prevById = new Map(prev.map((x) => [x.id, x]));
@@ -188,7 +247,7 @@ export function mergeHistory(prev = [], fresh = [], now = Date.now(), ttlMs = 72
   for (const old of prev) {
     if (freshIds.has(old.id)) continue;
     if (now - Date.parse(old.firstSeen ?? nowIso) > ttlMs) continue;
-    merged.push({ ...old, stale: true });
+    merged.push({ ...old, stale: true, tags: retag(old) });
   }
   return merged;
 }
