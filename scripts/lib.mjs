@@ -157,3 +157,9 @@ export function nextStreaks(prevSources = [], results = []) {
 export function unhealthy(sources = [], threshold = FAIL_THRESHOLD) {
   return sources.filter((s) => (s.failStreak ?? 0) >= threshold);
 }
+
+// 檢查上一輪快照格式是否可用（從已部署網站取回時，避免吃進壞資料）
+export function isValidSnapshot(x) {
+  return !!x && Array.isArray(x.items) && x.items.every((i) => i && typeof i.id === 'string' && typeof i.url === 'string')
+    && (x.sources === undefined || Array.isArray(x.sources));
+}

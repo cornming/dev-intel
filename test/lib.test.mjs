@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseFeed, normalizeUrl, tagsFor, dedupe, mergeHistory, finalize, decodeEntities, diversify, nextStreaks, unhealthy } from '../scripts/lib.mjs';
+import { parseFeed, normalizeUrl, tagsFor, dedupe, mergeHistory, finalize, decodeEntities, diversify, nextStreaks, unhealthy, isValidSnapshot } from '../scripts/lib.mjs';
 
 test('parseFeed 解析 RSS（含 CDATA 與實體）', () => {
   const xml = `<rss><channel><item><title><![CDATA[Rust &amp; Go]]></title><link>https://a.com/1</link><pubDate>Mon, 17 Nov 2026 08:00:00 GMT</pubDate></item></channel></rss>`;
@@ -93,4 +93,13 @@ test('nextStreaks：失敗累加、成功歸零、新來源從 0 起算', () => 
 test('unhealthy：只回報連續失敗達門檻的來源', () => {
   const r = unhealthy([{ name: 'A', failStreak: 2 }, { name: 'B', failStreak: 3 }, { name: 'C' }]);
   assert.deepEqual(r.map((x) => x.name), ['B']);
+});
+
+test('isValidSnapshot：接受正常快照，拒絕壞資料', () => {
+  assert.equal(isValidSnapshot({ items: [{ id: 'a', url: 'https://x' }], sources: [] }), true);
+  assert.equal(isValidSnapshot({ items: [] }), true);
+  assert.equal(isValidSnapshot(null), false);
+  assert.equal(isValidSnapshot({ items: 'x' }), false);
+  assert.equal(isValidSnapshot({ items: [{ id: 1, url: 'u' }] }), false);
+  assert.equal(isValidSnapshot({ items: [], sources: {} }), false);
 });

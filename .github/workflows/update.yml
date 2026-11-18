@@ -15,7 +15,7 @@ concurrency:
   cancel-in-progress: false
 
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 
@@ -29,24 +29,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          # 一律取最新的 main：Re-run 預設會用舊 commit，推送資料時會被拒絕
-          ref: main
+          ref: main # 一律取最新的 main，避免 Re-run 時用到舊版程式
       - uses: actions/setup-node@v4
         with:
           node-version: 22
       - name: 單元測試
         run: npm test
+      # 資料不再提交進 repo：上一輪的狀態直接從已部署的網站取回
+      - name: 取得上一輪資料
+        run: node scripts/fetch-prev.mjs
+        env:
+          PREV_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/data/latest.json
       - name: 抓取各來源
         run: npm run build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: 提交最新資料
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/latest.json
-          git diff --cached --quiet || git commit -m "chore(data): 更新情報 $(TZ=Asia/Taipei date '+%Y-%m-%d %H:%M') (台北)"
-          git push
       - name: 整理要發布的檔案
         run: |
           mkdir _site

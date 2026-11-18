@@ -31,6 +31,10 @@
 
 排名與主題規則都在 `scripts/lib.mjs`、來源清單與權重在 `scripts/sources.mjs`，要新增來源只要加一個 `rssSource({...})`。
 
+## 資料不進 git 歷史
+
+`data/latest.json` 每 5 小時就會變動一次（約 26 KB，壓縮後），若每次都提交，一年會多出約 1,800 個 commit。所以工作流程**不提交資料**：每輪開始時先從已部署的網站取回上一輪的 `latest.json`（`scripts/fetch-prev.mjs`），在它的基礎上更新，再直接部署。repo 內只留一份當初的初始檔案當備援（取不到網站時才會用到）。
+
 ## 來源故障通知
 
 每個來源在 `data/latest.json` 都有 `failStreak`（連續失敗輪數）。連續失敗達 3 輪（約 15 小時）時，`scripts/check-health.mjs` 會讓該次工作流程轉紅；這一步放在部署之後，所以網站仍照常更新。GitHub 預設會寄「工作流程失敗」通知信給 repo 擁有者（到 GitHub Settings → Notifications → Actions 確認有開啟）。單次的暫時性失敗不會觸發通知。
@@ -47,7 +51,7 @@ python3 -m http.server 8000   # 打開 http://localhost:8000
 
 ## 部署（第一次要做一次）
 
-到 repo 的 **Settings → Pages → Build and deployment → Source**，選 **GitHub Actions**。之後每次排程或手動執行，工作流程會自動抓資料、提交 `data/latest.json` 並發布網站。
+到 repo 的 **Settings → Pages → Build and deployment → Source**，選 **GitHub Actions**。之後每次排程或手動執行，工作流程會自動抓資料並發布網站。
 
 ## 參考的開源專案
 
