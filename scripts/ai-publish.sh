@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
-# 給「排程任務」用：把 analysis.json 發布到 ai-analysis 分支（網站直接從那裡讀）。
+# 給「排程任務」用：把 analysis.json 發布到 claude/ai-analysis 分支（網站直接從那裡讀）。
 # 用法：bash scripts/ai-publish.sh /tmp/ai/analysis.json
 # 只更新那一個檔案，不碰 main；分支不存在時會自動建立。
 set -euo pipefail
 SRC="${1:?用法: ai-publish.sh <analysis.json>}"
 REPO_URL="${REPO_URL:-https://github.com/cornming/dev-intel}"
-BRANCH=ai-analysis
+# 預設發布到 claude/ai-analysis：排程任務的推送權限通常限定在 claude/ 開頭的分支。可用 PUBLISH_BRANCH 覆寫。
+BRANCH="${PUBLISH_BRANCH:-claude/ai-analysis}"
 python3 -c "import json,sys; d=json.load(open(sys.argv[1])); assert isinstance(d,dict) and d.get('generatedAt')" "$SRC"
 
 W="$(mktemp -d)"; trap 'rm -rf "$W"' EXIT

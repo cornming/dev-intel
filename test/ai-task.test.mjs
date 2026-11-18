@@ -87,9 +87,9 @@ test('ai-publish：首次建立孤立分支、再次更新、內容相同時略�
   const env = { PATH: process.env.PATH, HOME: process.env.HOME, REPO_URL: remote };
   let r = spawnSync('bash', [S('ai-publish.sh'), a1], { env, encoding: 'utf8' });
   assert.equal(r.status, 0, r.stderr);
-  const check = join(root, 'check'); git(root, 'clone', '-q', '-b', 'ai-analysis', remote, check);
+  const check = join(root, 'check'); git(root, 'clone', '-q', '-b', 'claude/ai-analysis', remote, check);
   assert.equal(JSON.parse(readFileSync(join(check, 'analysis.json'), 'utf8')).summary, 'v1');
-  assert.ok(!existsSync(join(check, 'README.md')), 'ai-analysis 分支只該有 analysis.json');
+  assert.ok(!existsSync(join(check, 'README.md')), 'claude/ai-analysis 分支只該有 analysis.json');
 
   r = spawnSync('bash', [S('ai-publish.sh'), a1], { env, encoding: 'utf8' });   // 相同內容
   assert.match(r.stdout, /沒有變更/);
@@ -99,7 +99,7 @@ test('ai-publish：首次建立孤立分支、再次更新、內容相同時略�
   assert.equal(r.status, 0, r.stderr);
   git(check, 'pull', '-q');
   assert.equal(JSON.parse(readFileSync(join(check, 'analysis.json'), 'utf8')).summary, 'v2');
-  assert.equal(git(root, '--git-dir', remote, 'rev-list', '--count', 'ai-analysis').stdout.trim(), '2');
+  assert.equal(git(root, '--git-dir', remote, 'rev-list', '--count', 'claude/ai-analysis').stdout.trim(), '2');
   assert.equal(git(root, '--git-dir', remote, 'rev-parse', 'main').stdout.trim(), git(seed, 'rev-parse', 'HEAD').stdout.trim(), 'main 不該被動到');
 
   const bad = join(root, 'bad.json'); writeFileSync(bad, '{"x":1}');                  // 缺 generatedAt → 拒絕發布
