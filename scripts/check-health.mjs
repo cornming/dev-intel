@@ -7,9 +7,6 @@ import { unhealthy, FAIL_THRESHOLD } from './lib.mjs';
 const file = resolve(dirname(fileURLToPath(import.meta.url)), '../data/latest.json');
 const { sources = [] } = JSON.parse(await readFile(file, 'utf8'));
 const bad = unhealthy(sources);
-// AI 分析（若有啟用）：連續失敗達門檻同樣視為異常，例如訂閱額度用完、token 過期
-const ai = await readFile(resolve(dirname(file), 'analysis.json'), 'utf8').then(JSON.parse).catch(() => null);
-if (ai && (ai.failStreak ?? 0) >= FAIL_THRESHOLD) bad.push({ name: 'AI 分析', failStreak: ai.failStreak, error: ai.lastError });
 if (bad.length === 0) {
   console.log('所有來源狀態正常。');
 } else {

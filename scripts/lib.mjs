@@ -286,27 +286,3 @@ export function validateAnalysis(raw, validIds, validCves) {
   if (!summary && !actions.length && !highlights.length) return null;
   return { summary, actions, highlights, divergences, glossary };
 }
-
-export const ANALYSIS_SCHEMA = {
-  type: 'object',
-  properties: {
-    summary: { type: 'string' },
-    actions: { type: 'array', items: { type: 'object', properties: { title: { type: 'string' }, why: { type: 'string' }, urgency: { type: 'string', enum: ['high', 'medium'] }, itemIds: { type: 'array', items: { type: 'string' } }, cves: { type: 'array', items: { type: 'string' } } }, required: ['title', 'why'] } },
-    highlights: { type: 'array', items: { type: 'object', properties: { itemId: { type: 'string' }, summary: { type: 'string' }, impact: { type: 'string' }, importance: { type: 'integer' } }, required: ['itemId', 'summary'] } },
-    divergences: { type: 'array', items: { type: 'object', properties: { topic: { type: 'string' }, claims: { type: 'array', items: { type: 'object', properties: { source: { type: 'string' }, claim: { type: 'string' } }, required: ['source', 'claim'] } }, judgement: { type: 'string' } }, required: ['topic', 'claims', 'judgement'] } },
-    glossary: { type: 'array', items: { type: 'object', properties: { term: { type: 'string' }, definition: { type: 'string' }, why: { type: 'string' } }, required: ['term', 'definition'] } },
-  },
-  required: ['summary', 'actions', 'highlights'],
-};
-
-// 從 claude -p --output-format json 的回應取出分析物件：優先 structured_output，其次 result 內的 JSON
-export function extractAnalysisPayload(stdout) {
-  let outer;
-  try { outer = JSON.parse(stdout); } catch { return null; }
-  if (outer && typeof outer === 'object' && outer.is_error) return null;
-  if (outer?.structured_output && typeof outer.structured_output === 'object') return outer.structured_output;
-  const text = typeof outer?.result === 'string' ? outer.result : '';
-  const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
-  const body = (fenced ? fenced[1] : text).trim();
-  try { return JSON.parse(body); } catch { return null; }
-}

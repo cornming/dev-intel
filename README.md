@@ -57,7 +57,7 @@
 2. Claude 依 `ai/RULES.md` 的規則寫出分析（`raw.json`）。
 3. `scripts/ai-validate.mjs`：**嚴格驗證**才放行——引用的項目 ID、CVE 必須真的存在，AI 產生的網址與標記一律移除，數值夾在合理範圍。
 4. `scripts/ai-publish.sh`：把 `analysis.json` 推到 `claude/ai-analysis` 分支（只有這個檔案，不碰 `main`）。
-5. 網站直接從 `raw.githubusercontent.com` 讀取該檔案；讀不到時退回同站的 `data/analysis.json`；兩者都沒有就不顯示該頁籤。
+5. 網站直接從 `raw.githubusercontent.com` 讀取該檔案；讀不到就不顯示該頁籤。
 
 要調整分析的規則，只要改 `ai/RULES.md` 並推上 `main`，下次執行就會套用，不必動排程。
 
@@ -77,10 +77,6 @@
 - 只傳標題與統計（公開資料）；提示詞明確要求把標題當資料、忽略其中的任何指示。
 - 發布前一定經過 `ai-validate.mjs`，**AI 的輸出不被信任**；驗證失敗就不發布，網站保留上一次的分析。
 - 限制：Claude 沒有讀過文章全文、也沒有上網查證，只能依標題與統計判斷，所以網站上不會有「已查證」的宣稱，並且在頁面標示「請以原文為準」。
-
-### 另一種做法：GitHub Actions（選用，目前未啟用）
-
-`scripts/ai-analyze.mjs` 與工作流程中的「AI 分析」步驟是舊的 CI 版：需要在 repo 設定 `CLAUDE_CODE_OAUTH_TOKEN`（`claude setup-token` 產生、一年期）才會執行，沒有設定就自動略過。目前採用排程任務，這部分保留作為備案。
 
 ## 封面圖
 

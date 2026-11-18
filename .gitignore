@@ -2,4 +2,3 @@ node_modules/
 _site/
 .DS_Store
 data/latest.json
-data/analysis.json

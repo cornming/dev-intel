@@ -307,8 +307,8 @@ $('sort').addEventListener('change', (e) => { state.sort = e.target.value; rende
 
 const optionalJson = (url) => fetch(url, { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
 // AI 今日重點由「排程任務」發布到 claude/ai-analysis 分支（raw.githubusercontent.com 允許跨網域讀取）；
-// 讀不到時退回同網站的 data/analysis.json（CI 版，若有啟用）。兩者都沒有就不顯示該頁籤。
-const ANALYSIS_URLS = ['https://raw.githubusercontent.com/cornming/dev-intel/claude/ai-analysis/analysis.json', 'data/analysis.json'];
+// 讀不到（尚未發布過、或分支不存在）就不顯示該頁籤。
+const ANALYSIS_URLS = ['https://raw.githubusercontent.com/cornming/dev-intel/claude/ai-analysis/analysis.json'];
 const loadAnalysis = async () => {
   for (const u of ANALYSIS_URLS) { const j = await optionalJson(u); if (j && typeof j === 'object' && !Array.isArray(j)) return j; }
   return null;
