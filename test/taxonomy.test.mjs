@@ -79,5 +79,5 @@ test('publicTaxonomy：只含名稱對照，不含比對規則', () => {
   const p = publicTaxonomy(tax);
   assert.equal(p.industries.length, raw.industries.length);
   assert.deepEqual(Object.keys(p.industries[0]).sort(), ['id', 'name']);
-  assert.deepEqual(Object.keys(p.entities[0]).sort(), ['id', 'name']);
+  assert.deepEqual(Object.keys(p.entities[0]).sort(), ['id', 'industries', 'name']);
 });

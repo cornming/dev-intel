@@ -53,5 +53,5 @@ export function classify(item, tax, maxInds = 2) {
 // 給前端用的名稱對照（不含比對規則）
 export const publicTaxonomy = (tax) => ({
   industries: tax.industries.map(({ id, name }) => ({ id, name })),
-  entities: tax.entities.map(({ id, name }) => ({ id, name })),
+  entities: tax.entities.map(({ id, name, industries }) => ({ id, name, industries })),
 });

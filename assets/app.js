@@ -3,13 +3,15 @@
 const SCHEDULE_HOURS = [0, 5, 10, 15, 20];
 const TABS = DevTabs.TABS; // 與訂閱輸出共用（assets/tabs.js）
 const PANEL_TABS = [
+  { key: 'dash', label: '📊 儀表板', panel: true, when: () => true },
   { key: 'brief', label: '✨ 今日重點', panel: true, when: (d) => d.analysis && !d.analysis.empty },
   { key: 'sec', label: '🛡 資安與版本', panel: true, when: (d) => d.kev && d.kev.latest?.length },
 ];
 const visibleTabs = () => [...PANEL_TABS.filter((t) => t.when(state.data)), ...TABS];
 const STYPE = { official: '官方', media: '媒體', community: '社群', repo: '開源專案' };
 const $ = (id) => document.getElementById(id);
-const state = { data: null, tab: 'all', tag: '', source: '', sort: 'hot', q: '' };
+const watchStore = DevWatch.createStore(DevWatch.localAdapter()); // 我的追蹤（目前存在這個瀏覽器；之後可換成帳號同步的 adapter）
+const state = { data: null, tab: UrlState.DEFAULT_TAB, tag: '', source: '', sort: 'hot', q: '' };
 
 function nextRun(now = Date.now()) {
   const TZ = 8 * 36e5;
@@ -272,12 +274,16 @@ function renderSecurity() {
   return root;
 }
 
+function renderDash() {
+  return DevDash.render({ data: state.data, history: state.data.history, analysis: state.data.analysis, store: watchStore, onChange: () => render() });
+}
+
 function render() {
-  if (!visibleTabs().some((t) => t.key === state.tab)) state.tab = 'all';
+  if (!visibleTabs().some((t) => t.key === state.tab)) state.tab = UrlState.DEFAULT_TAB;
   renderTabs(); renderMeta();
   const tab = visibleTabs().find((t) => t.key === state.tab);
   $('cards-ui').hidden = !!tab.panel; $('panel').hidden = !tab.panel;
-  if (tab.panel) { $('panel').replaceChildren(tab.key === 'brief' ? renderBrief() : renderSecurity()); return; }
+  if (tab.panel) { $('panel').replaceChildren(tab.key === 'dash' ? renderDash() : tab.key === 'brief' ? renderBrief() : renderSecurity()); return; }
   $('sub-atom').href = tab.key === 'all' ? 'feed.xml' : `feeds/${tab.key}.atom.xml`; // 目前分類的訂閱連結
   $('sub-rss').href = `feeds/${tab.key}.rss.xml`;
   const pool = state.data.items.filter(tab.test);
@@ -333,7 +339,9 @@ const loadAnalysis = async () => {
 Promise.all([
   fetch('data/latest.json', { cache: 'no-cache' }).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); }),
   loadAnalysis(),
+  optionalJson('data/history.json'),
+  watchStore.init(),
 ])
-  .then(([d, analysis]) => { d.analysis = analysis && typeof analysis === 'object' ? analysis : null; return d; })
+  .then(([d, analysis, history]) => { d.analysis = analysis && typeof analysis === 'object' ? analysis : null; d.history = history && history.days ? history : null; return d; })
   .then((d) => { state.data = d; applyUrl(); render(); writeUrl(false); initTranslate(); setInterval(renderMeta, 60000); })
   .catch(() => { $('meta').textContent = '資料載入失敗，請稍後再試。'; });

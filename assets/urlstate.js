@@ -1,7 +1,8 @@
 'use strict';
 // 篩選狀態 ⇄ 網址查詢字串。純函式（不碰 DOM／history），方便測試。
-// 例：?tab=tw&tag=資安&src=iThome&sort=new&q=漏洞　預設值不寫進網址，讓網址保持乾淨。
+// 例：?tab=tw&tag=資安&src=iThome&sort=new&q=漏洞　預設值（儀表板首頁、熱門排序）不寫進網址，讓網址保持乾淨。
 (function (root) {
+  const DEFAULT_TAB = 'dash'; // 首頁預設是儀表板；預設值不寫進網址
   const SORTS = ['hot', 'new'];
   const MAX = { tag: 30, src: 40, q: 100 };
 
@@ -13,7 +14,7 @@
     const tab = get('tab');
     const sort = get('sort');
     return {
-      tab: validTabs.includes(tab) ? tab : 'all',
+      tab: validTabs.includes(tab) ? tab : DEFAULT_TAB,
       tag: get('tag').slice(0, MAX.tag),
       source: get('src').slice(0, MAX.src),
       sort: SORTS.includes(sort) ? sort : 'hot',
@@ -24,7 +25,7 @@
   // 狀態轉成查詢字串（含開頭的 ?；全部是預設值時回傳空字串）
   function build(state) {
     const p = new URLSearchParams();
-    if (state.tab && state.tab !== 'all') p.set('tab', state.tab);
+    if (state.tab && state.tab !== DEFAULT_TAB) p.set('tab', state.tab);
     if (state.tag) p.set('tag', state.tag);
     if (state.source) p.set('src', state.source);
     if (state.sort && state.sort !== 'hot') p.set('sort', state.sort);
@@ -33,7 +34,7 @@
     return s ? `?${s}` : '';
   }
 
-  const api = { parse, build, SORTS };
+  const api = { parse, build, SORTS, DEFAULT_TAB };
   root.UrlState = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof self !== 'undefined' ? self : globalThis);
