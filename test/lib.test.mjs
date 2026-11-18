@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseFeed, normalizeUrl, tagsFor, dedupe, mergeHistory, finalize, decodeEntities } from '../scripts/lib.mjs';
+import { parseFeed, normalizeUrl, tagsFor, dedupe, mergeHistory, finalize, decodeEntities, diversify } from '../scripts/lib.mjs';
 
 test('parseFeed 解析 RSS（含 CDATA 與實體）', () => {
   const xml = `<rss><channel><item><title><![CDATA[Rust &amp; Go]]></title><link>https://a.com/1</link><pubDate>Mon, 17 Nov 2026 08:00:00 GMT</pubDate></item></channel></rss>`;
@@ -63,4 +63,23 @@ test('finalize：同來源分數高者排前；時間越久越低；stale 打折
   assert.equal(out[0].id, 'a');
   assert.ok(out.find((x) => x.id === 'd').hot < out.find((x) => x.id === 'a').hot);
   assert.ok(out.find((x) => x.id === 'c').hot < out.find((x) => x.id === 'a').hot);
+});
+
+test('沒有分數的來源，最新一則也不會超過有分數來源的最高分', () => {
+  const now = Date.parse('2026-11-18T00:00:00Z');
+  const t = '2026-11-17T23:59:00Z';
+  const rss = Array.from({ length: 5 }, (_, i) => ({ id: `r${i}`, source: 'RSS', score: 0, time: t, order: i }));
+  const hn = Array.from({ length: 5 }, (_, i) => ({ id: `h${i}`, source: 'HN', score: 100 - i * 10, time: t, order: i }));
+  const out = finalize([...rss, ...hn], { RSS: 1, HN: 1 }, now);
+  assert.equal(out[0].source, 'HN');
+});
+
+test('diversify：同來源連續項目逐步降權，讓不同來源交錯', () => {
+  const items = [
+    { id: 'a1', source: 'A', hot: 1.0 }, { id: 'a2', source: 'A', hot: 0.99 }, { id: 'a3', source: 'A', hot: 0.98 },
+    { id: 'b1', source: 'B', hot: 0.95 },
+  ];
+  const out = diversify(items);
+  assert.equal(out[0].id, 'a1');
+  assert.equal(out[1].id, 'b1'); // a2 降權成 0.92，低於 b1(0.95)
 });

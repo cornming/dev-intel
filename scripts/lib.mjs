@@ -88,7 +88,9 @@ export function rankItems(items, weights = {}, now = Date.now()) {
     sorted.forEach((it, i) => {
       const pct = list.length > 1 ? 1 - i / (list.length - 1) : 1;
       const ageH = Math.max(0, (now - Date.parse(it.time ?? it.firstSeen ?? now)) / 36e5);
-      it.hot = Number(((0.15 + 0.85 * pct) * (weights[source] ?? 1) / (1 + ageH / 24)).toFixed(4));
+      // 沒有分數的來源（RSS）名次只代表「新舊」，不是人氣，所以上限壓低到 0.7
+      const base = hasScore ? 0.15 + 0.85 * pct : 0.15 + 0.55 * pct;
+      it.hot = Number((base * (weights[source] ?? 1) / (1 + ageH / 24)).toFixed(4));
     });
   }
   return items;
@@ -123,9 +125,23 @@ export function mergeHistory(prev = [], fresh = [], now = Date.now(), ttlMs = 72
   return merged;
 }
 
-// 排名後排序；過期保留的項目打五折，並限制總數
+// 多樣性：同一來源在榜上每多出現一則就乘上 DIVERSITY，讓不同來源交錯而不是單一來源連續霸榜
+export const DIVERSITY = 0.93;
+
+export function diversify(sortedItems, factor = DIVERSITY) {
+  const seen = new Map();
+  for (const it of sortedItems) {
+    const k = seen.get(it.source) ?? 0;
+    seen.set(it.source, k + 1);
+    it.hot = Number((it.hot * factor ** k).toFixed(4));
+  }
+  return sortedItems.sort((a, b) => b.hot - a.hot);
+}
+
+// 排名後排序；過期保留的項目打五折，再做多樣性調整，最後限制總數
 export function finalize(items, weights, now = Date.now(), cap = 400) {
   rankItems(items, weights, now);
   for (const it of items) if (it.stale) it.hot = Number((it.hot * 0.5).toFixed(4));
-  return items.sort((a, b) => b.hot - a.hot).slice(0, cap);
+  items.sort((a, b) => b.hot - a.hot);
+  return diversify(items).slice(0, cap);
 }
