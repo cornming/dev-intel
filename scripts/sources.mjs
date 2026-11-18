@@ -1,5 +1,5 @@
 // 各來源抓取器：每個都回傳統一格式的項目陣列，單一來源失敗不影響其他來源。
-import { parseFeed, idFor, tagsFor, cleanImageUrl } from './lib.mjs';
+import { parseFeed, idFor, tagsFor, cleanImageUrl, stripQuery } from './lib.mjs';
 
 const UA = 'dev-intel/1.0 (+https://github.com/cornming/dev-intel)';
 const TIMEOUT_MS = 20000;
@@ -119,22 +119,32 @@ const githubRepos = {
 };
 
 // needTag：綜合科技媒體含大量非軟體內容（股市、消費電子），只留下命中主題標籤的項目
-function rssSource({ name, url, region = 'tw', kind = 'news', weight = 0.8, limit = 25, filter, needTag = false }) {
+function rssSource({ name, url, region = 'tw', kind = 'news', weight = 0.8, limit = 25, filter, needTag = false, clean = false }) {
   return {
     name, weight,
     async fetch() {
       const xml = await get(url, { headers: { 'user-agent': 'Mozilla/5.0 (compatible; dev-intel/1.0)' } });
       return parseFeed(xml).filter((e) => (filter ? filter(e) : true)).slice(0, limit)
-        .map((e, i) => mk(name, region, kind, { title: e.title, url: e.link, time: e.time, image: e.image }, i))
+        .map((e, i) => mk(name, region, kind, { title: e.title, url: clean ? stripQuery(e.link) : e.link, time: e.time, image: e.image }, i))
         .filter((x) => !needTag || x.tags.length > 0);
     },
   };
 }
+
+// 職涯文章是否與軟體／科技相關（標題）
+export const RELEVANT = /工程師|程式|軟體|開發|資訊|資工|前端|後端|演算法|科技|AI|IT|網頁|資料|新創|大公司|產業|面試|薪資|薪水|轉職軟體/i;
 
 export const SOURCES = [
   hackerNews, lobsters, devto, githubRepos, devtoCareer, lobstersCulture,
   rssSource({ name: 'iThome', url: 'https://www.ithome.com.tw/rss', weight: 1.0 }),
   rssSource({ name: 'TechNews 科技新報', url: 'https://technews.tw/feed/', weight: 0.8, limit: 40, needTag: true }),
   rssSource({ name: 'TechOrange', url: 'https://feeds.feedburner.com/TechOrange', weight: 0.7, needTag: true }),
+  // ── 台灣在地：只用官方公開 RSS。求職站（104、CakeResume 等）沒有公開 feed，也不去抓取 ──
+  rssSource({ name: 'iT邦幫忙', url: 'https://ithelp.ithome.com.tw/rss/articles', weight: 0.8, limit: 20, clean: true }),
+  rssSource({ name: 'INSIDE', url: 'https://www.inside.com.tw/feed/rss', weight: 0.7, needTag: true }),
+  rssSource({ name: 'Medium 軟體工程師', url: 'https://medium.com/feed/tag/軟體工程師', weight: 0.7, limit: 10, clean: true }),
+  // 轉職／職涯標籤包含很多一般職涯文章，只留與軟體、技術、科技產業相關的
+  rssSource({ name: 'Medium 轉職', url: 'https://medium.com/feed/tag/轉職', kind: 'job', weight: 0.8, limit: 10, clean: true, filter: (e) => RELEVANT.test(e.title) }),
+  rssSource({ name: 'Medium 職涯', url: 'https://medium.com/feed/tag/職涯', kind: 'job', weight: 0.8, limit: 10, clean: true, filter: (e) => RELEVANT.test(e.title) }),
   rssSource({ name: 'GitHub Blog', url: 'https://github.blog/feed/', region: 'global', weight: 0.7, limit: 10 }),
 ];

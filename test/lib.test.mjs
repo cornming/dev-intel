@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseFeed, normalizeUrl, tagsFor, dedupe, mergeHistory, finalize, decodeEntities, diversify, nextStreaks, unhealthy, isValidSnapshot, cleanImageUrl, feedImage, extractOgImage } from '../scripts/lib.mjs';
+import { parseFeed, normalizeUrl, tagsFor, dedupe, mergeHistory, finalize, decodeEntities, diversify, nextStreaks, unhealthy, isValidSnapshot, cleanImageUrl, feedImage, extractOgImage, stripQuery, dropSharedImages } from '../scripts/lib.mjs';
 
 test('parseFeed 解析 RSS（含 CDATA 與實體）', () => {
   const xml = `<rss><channel><item><title><![CDATA[Rust &amp; Go]]></title><link>https://a.com/1</link><pubDate>Mon, 17 Nov 2026 08:00:00 GMT</pubDate></item></channel></rss>`;
@@ -207,4 +207,37 @@ test('pickCycles：只留支援期內版本、計算剩餘天數並標示 90 天
   assert.equal(r[0].daysLeft, 43);
   assert.equal(r[1].daysLeft, null);
   assert.equal(r[1].soon, false);
+});
+
+import { RELEVANT } from '../scripts/sources.mjs';
+
+test('stripQuery：去掉追蹤參數與錨點，但保留路徑', () => {
+  assert.equal(stripQuery('https://ithelp.ithome.com.tw/articles/10425471?sc=rss.qu'), 'https://ithelp.ithome.com.tw/articles/10425471');
+  assert.equal(stripQuery('https://medium.com/@a/post-abc123?source=rss-----tag#x'), 'https://medium.com/@a/post-abc123');
+  assert.equal(stripQuery('不是網址'), '不是網址');
+});
+
+test('RELEVANT：職涯文章只留與軟體／科技相關的', () => {
+  for (const t of ['轉職軟體工程師之前或許你該知道的產業地圖', 'AI 時代該轉職嗎？', '面試時被問到系統設計怎麼辦', '新創 vs. 大公司：哪一個才適合你？']) assert.ok(RELEVANT.test(t), t);
+  for (const t of ['別怕「我不會」: 從 UNIQLO 店長的故事看見共好的力量', '達成目標後為什麼反而覺得空虛？', '人生藍圖怎麼規劃？']) assert.ok(!RELEVANT.test(t), t);
+});
+
+test('cleanImageUrl：Medium 圖片縮成 600px，其他網站的圖不動', () => {
+  assert.equal(cleanImageUrl('https://cdn-images-1.medium.com/max/2600/1*abc.png'), 'https://cdn-images-1.medium.com/max/600/1*abc.png');
+  assert.equal(cleanImageUrl('https://cdn-images-1.medium.com/max/1448/0*xyz'), 'https://cdn-images-1.medium.com/max/600/0*xyz');
+  assert.equal(cleanImageUrl('https://example.com/max/2600/a.png'), 'https://example.com/max/2600/a.png');
+});
+
+test('dropSharedImages：同來源 3 則以上共用同一張圖視為預設圖並清掉，不同來源或不足 3 則不動', () => {
+  const mk = (id, source, image) => ({ id, source, image, imgChecked: false });
+  const items = [
+    mk(1, 'A', 'https://x/default.jpg'), mk(2, 'A', 'https://x/default.jpg'), mk(3, 'A', 'https://x/default.jpg'), mk(4, 'A', 'https://x/own.jpg'),
+    mk(5, 'B', 'https://x/default.jpg'),                                   // 不同來源，只有 1 則
+    mk(6, 'C', 'https://x/two.jpg'), mk(7, 'C', 'https://x/two.jpg'),     // 只有 2 則
+    mk(8, 'D', null),
+  ];
+  assert.equal(dropSharedImages(items), 3);
+  assert.deepEqual(items.map((x) => x.image), [null, null, null, 'https://x/own.jpg', 'https://x/default.jpg', 'https://x/two.jpg', 'https://x/two.jpg', null]);
+  assert.ok(items.slice(0, 3).every((x) => x.imgChecked), '已判定為預設圖的不要再重抓');
+  assert.equal(dropSharedImages(items), 0, '重複執行不會再變動');
 });

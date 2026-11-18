@@ -3,7 +3,7 @@ import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { SOURCES } from './sources.mjs';
-import { dedupe, mergeHistory, finalize, nextStreaks, sourceTypeOf } from './lib.mjs';
+import { dedupe, mergeHistory, finalize, nextStreaks, sourceTypeOf, dropSharedImages } from './lib.mjs';
 import { enrichImages } from './images.mjs';
 import { fetchKev, fetchLifecycle } from './security.mjs';
 
@@ -47,6 +47,8 @@ const merged = mergeHistory(prev.items.filter((x) => known.has(x.source)), fresh
 const ranked = finalize(merged, weights, now);
 // 排名高的優先補封面圖；每篇只抓一次，結果存進資料沿用
 const imgStats = await enrichImages(ranked);
+const sharedDropped = dropSharedImages(ranked);
+if (sharedDropped) console.log(`略過 ${sharedDropped} 張疑似網站預設圖（同來源多則共用）`);
 console.log(`封面圖：本輪查 ${imgStats.done}/${imgStats.queued} 篇，找到 ${imgStats.found} 張（${imgStats.ms} ms）`);
 const items = ranked.map(({ order, ...rest }) => ({ ...rest, stype: sourceTypeOf(rest.source) }));
 

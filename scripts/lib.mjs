@@ -31,6 +31,8 @@ export function cleanImageUrl(raw, base) {
     const u = new URL(decodeEntities(String(raw).trim()), base);
     if (u.protocol !== 'https:' || u.href.length > 600) return null;
     if (/(feedburner|pixel|tracker|tracking|1x1|spacer)/i.test(u.href) || /\.gif($|\?)/i.test(u.pathname)) return null;
+    // Medium 的圖片 CDN 支援指定寬度；卡片只需要約 600px，原圖常超過 1.5 MB
+    if (u.hostname === 'cdn-images-1.medium.com') u.pathname = u.pathname.replace(/^\/max\/\d+\//, '/max/600/');
     return u.href;
   } catch {
     return null;
@@ -99,6 +101,11 @@ export function normalizeUrl(raw) {
   } catch {
     return raw;
   }
+}
+
+// 有些來源的連結帶追蹤參數（iT邦幫忙 ?sc=rss.qu、Medium ?source=rss-...），存起來前整個查詢字串去掉
+export function stripQuery(raw) {
+  try { const u = new URL(raw); u.search = ''; u.hash = ''; return u.toString(); } catch { return raw; }
 }
 
 export const idFor = (url) => createHash('sha1').update(normalizeUrl(url)).digest('hex').slice(0, 12);
@@ -229,6 +236,7 @@ export function isValidSnapshot(x) {
 export const SOURCE_TYPES = {
   'Hacker News': 'community', Lobsters: 'community', DEV: 'community', 'DEV 職涯': 'community', 'Lobsters 職場文化': 'community',
   'GitHub 新星專案': 'repo', 'GitHub Blog': 'official',
+  'iT邦幫忙': 'community', 'Medium 軟體工程師': 'community', 'Medium 轉職': 'community', 'Medium 職涯': 'community', INSIDE: 'media',
   iThome: 'media', 'TechNews 科技新報': 'media', TechOrange: 'media',
 };
 export const sourceTypeOf = (name) => SOURCE_TYPES[name] ?? 'media';
@@ -285,4 +293,16 @@ export function validateAnalysis(raw, validIds, validCves) {
   const summary = clip(raw.summary, 300);
   if (!summary && !actions.length && !highlights.length) return null;
   return { summary, actions, highlights, divergences, glossary };
+}
+
+// 同一來源有 minCount 則以上共用同一張圖，多半是網站的預設分享圖／站徽（例如 iT邦幫忙的 fbpic.jpg），不是文章封面。
+// 把它們清掉（image 設為 null；imgChecked 維持 true，不會再去抓），卡片會顯示預設封面。
+export function dropSharedImages(items, minCount = 3) {
+  const count = new Map();
+  for (const it of items) if (it.image) { const k = `${it.source}\u0000${it.image}`; count.set(k, (count.get(k) ?? 0) + 1); }
+  let dropped = 0;
+  for (const it of items) {
+    if (it.image && count.get(`${it.source}\u0000${it.image}`) >= minCount) { it.image = null; it.imgChecked = true; dropped++; }
+  }
+  return dropped;
 }
