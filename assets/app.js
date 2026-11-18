@@ -102,7 +102,7 @@ function render() {
   $('count').textContent = `共 ${list.length} 則${list.length > 120 ? '（顯示前 120 則）' : ''}`;
   $('empty').hidden = list.length > 0;
   $('status-list').replaceChildren(...state.data.sources.map((s) =>
-    el('li', { class: s.ok ? '' : 'bad', text: `${s.ok ? '✓' : '✗'} ${s.name}：${s.ok ? s.count + ' 則' : '本輪抓取失敗，沿用舊資料'}` })));
+    el('li', { class: s.ok ? '' : 'bad', text: `${s.ok ? '✓' : '✗'} ${s.name}：${s.ok ? s.count + ' 則' : `本輪抓取失敗${s.failStreak > 1 ? `（已連續 ${s.failStreak} 輪）` : ''}，沿用舊資料`}` })));
 }
 
 $('q').addEventListener('input', (e) => { state.q = e.target.value; render(); });

@@ -31,6 +31,10 @@
 
 排名與主題規則都在 `scripts/lib.mjs`、來源清單與權重在 `scripts/sources.mjs`，要新增來源只要加一個 `rssSource({...})`。
 
+## 來源故障通知
+
+每個來源在 `data/latest.json` 都有 `failStreak`（連續失敗輪數）。連續失敗達 3 輪（約 15 小時）時，`scripts/check-health.mjs` 會讓該次工作流程轉紅；這一步放在部署之後，所以網站仍照常更新。GitHub 預設會寄「工作流程失敗」通知信給 repo 擁有者（到 GitHub Settings → Notifications → Actions 確認有開啟）。單次的暫時性失敗不會觸發通知。
+
 ## 本機執行
 
 需要 Node.js 20 以上。

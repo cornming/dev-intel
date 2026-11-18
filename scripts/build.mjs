@@ -3,13 +3,13 @@ import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { SOURCES } from './sources.mjs';
-import { dedupe, mergeHistory, finalize } from './lib.mjs';
+import { dedupe, mergeHistory, finalize, nextStreaks } from './lib.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = resolve(ROOT, 'data/latest.json');
 const now = Date.now();
 
-const prev = await readFile(OUT, 'utf8').then(JSON.parse).catch(() => ({ items: [] }));
+const prev = await readFile(OUT, 'utf8').then(JSON.parse).catch(() => ({ items: [], sources: [] }));
 
 const results = await Promise.all(SOURCES.map(async (s) => {
   try {
@@ -35,7 +35,7 @@ const items = finalize(merged, weights, now).map(({ order, ...rest }) => rest);
 
 const out = {
   generatedAt: new Date(now).toISOString(),
-  sources: results.map(({ name, ok, count, error }) => ({ name, ok, count, ...(error ? { error } : {}) })),
+  sources: nextStreaks(prev.sources, results).map(({ name, ok, count, error, failStreak }) => ({ name, ok, count, failStreak, ...(error ? { error } : {}) })),
   items,
 };
 await mkdir(dirname(OUT), { recursive: true });

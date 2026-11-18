@@ -145,3 +145,15 @@ export function finalize(items, weights, now = Date.now(), cap = 400) {
   items.sort((a, b) => b.hot - a.hot);
   return diversify(items).slice(0, cap);
 }
+
+// 來源健康：記錄各來源「連續失敗幾輪」，連續失敗達門檻就視為異常（交給 CI 轉紅通知）
+export const FAIL_THRESHOLD = 3;
+
+export function nextStreaks(prevSources = [], results = []) {
+  const prev = new Map(prevSources.map((s) => [s.name, s.failStreak ?? 0]));
+  return results.map((r) => ({ ...r, failStreak: r.ok ? 0 : (prev.get(r.name) ?? 0) + 1 }));
+}
+
+export function unhealthy(sources = [], threshold = FAIL_THRESHOLD) {
+  return sources.filter((s) => (s.failStreak ?? 0) >= threshold);
+}
