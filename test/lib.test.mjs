@@ -310,3 +310,14 @@ test('mergeHistory：保留的舊項目用目前規則重算標籤，舊標籤�
   assert.equal(by.c.tags.length, 3);
   assert.ok(by.a.stale && by.b.stale);
 });
+
+test('tagsFor：中文「網路」只在真的是網路技術時才標網路', () => {
+  const has = (t) => tagsFor(t).includes('網路');
+  assert.ok(!has('果粉哀號！iCloud、App Store 全掛點，蘋果揪出元兇：不是網路攻擊'));
+  assert.ok(!has('以神經網路預測股價走勢'));
+  assert.ok(!has('社群網路的演算法爭議'));
+  assert.ok(!has('網路購物詐騙再增'));
+  assert.ok(has('公司內部網路連線異常，排查路由設定'));
+  assert.ok(has('Tor匿名網路遭DDoS攻擊，官方緊急更新IPv6防禦機制'));
+  assert.ok(tagsFor('駭客發動網路攻擊癱瘓政府網站').includes('資安'), '網路攻擊歸資安');
+});

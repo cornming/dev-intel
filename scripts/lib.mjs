@@ -143,7 +143,8 @@ const RULES = [
   }],
   ['網路', {
     en: 'networking|(?<!neural |social )networks?|tcp|udp|ipv[46]|ip (?:address|route|routing)|dns|https?|quic|vpn|bgp|routing|routers?|latency|bandwidth|packets?|tcpdump|wireshark|mtu|smtp|imap|nginx|(?:reverse|http|socks|web) prox(?:y|ies)|proxy servers?|cdn|websockets?|webrtc|wi-?fi|5g|ethernet|snmp|nslookup|dmarc|dkim|spf',
-    zh: '網路|封包|網卡|路由|頻寬|延遲|郵件伺服器|代理伺服器|反解',
+    // 「網路」本身太籠統：網路攻擊／網路安全屬於資安，神經網路屬於 AI，社群網路、網路購物等不是技術主題
+    zh: '(?<!神經|社群)網路(?!攻擊|安全|購物|詐騙|犯罪|霸凌|行銷|直播|名人|紅人|平台|新聞|媒體)|封包|網卡|路由|頻寬|延遲|郵件伺服器|代理伺服器|反解',
   }],
   ['語言', {
     en: 'rust|golang|python|java|kotlin|(?<!taylor )swift(?! (?:payment|code|bank))|c\\+\\+|c#|f#|\\.net|asp\\.net|dotnet|zig|php|ruby|elixir|haskell|lua|nim|nimony|ocaml|scala|clojure|perl|lisp|dart|jvm|powershell|compilers?|programming languages?|programming|go (?:1\\.\\d+|modules?|routines?)|in go|c (?:language|standard|23|26)|c’s|java\\d\\w*',
