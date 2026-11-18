@@ -8,6 +8,12 @@ const TABS = [
   { key: 'repo', label: '⭐ 開源新星', test: (x) => x.kind === 'repo' },
   { key: 'job', label: '💼 職場', test: (x) => x.kind === 'job' || x.tags.includes('職場') },
 ];
+const PANEL_TABS = [
+  { key: 'brief', label: '✨ 今日重點', panel: true, when: (d) => d.analysis && !d.analysis.empty },
+  { key: 'sec', label: '🛡 資安與版本', panel: true, when: (d) => d.kev && d.kev.latest?.length },
+];
+const visibleTabs = () => [...PANEL_TABS.filter((t) => t.when(state.data)), ...TABS];
+const STYPE = { official: '官方', media: '媒體', community: '社群', repo: '開源專案' };
 const $ = (id) => document.getElementById(id);
 const state = { data: null, tab: 'all', tag: '', source: '', sort: 'hot', q: '' };
 
@@ -48,9 +54,9 @@ function renderMeta() {
 
 function renderTabs() {
   const box = $('tabs'); box.replaceChildren();
-  for (const t of TABS) {
-    const n = state.data.items.filter(t.test).length;
-    const b = el('button', { type: 'button', role: 'tab', 'aria-selected': String(state.tab === t.key), text: `${t.label} ${n}` });
+  for (const t of visibleTabs()) {
+    const label = t.panel ? t.label : `${t.label} ${state.data.items.filter(t.test).length}`;
+    const b = el('button', { type: 'button', role: 'tab', 'aria-selected': String(state.tab === t.key), text: label });
     b.onclick = () => { state.tab = t.key; state.tag = ''; render(); };
     box.append(b);
   }
@@ -105,11 +111,12 @@ function card(x) {
   const { head, text } = DevTranslate.splitTitle(x);
   const info = el('div', { class: 'info' },
     el('span', { class: `src${x.region === 'tw' ? ' tw' : ''}`, text: x.source }),
+    STYPE[x.stype] ? el('span', { class: 'stype', text: STYPE[x.stype] }) : null,
     ...x.tags.map((t) => el('span', { class: 'tag', text: t })),
     x.kind === 'repo' ? el('span', { text: `⭐ ${x.score.toLocaleString()}${x.lang ? ' · ' + x.lang : ''}` })
       : x.score ? el('span', { text: `▲ ${x.score}` }) : null,
     x.discuss && x.comments ? el('a', { href: safeUrl(x.discuss), target: '_blank', rel: 'noopener noreferrer', text: `💬 ${x.comments}` }) : null,
-    x.alsoOn?.length ? el('span', { text: `也在 ${x.alsoOn.join('、')}` }) : null,
+    x.alsoOn?.length ? el('span', { class: 'multi', title: `也在 ${x.alsoOn.join('、')}`, text: `${x.alsoOn.length + 1} 個來源` }) : null,
     el('span', { text: ago(x.time ?? x.firstSeen) }),
     x.stale ? el('span', { class: 'stale', text: '（來源暫時無更新）' }) : null,
   );
@@ -201,9 +208,82 @@ async function initTranslate() {
   if (wanted && (await DevTranslate.availability()) === 'available') enableTranslate();
 }
 
+const itemById = () => new Map(state.data.items.map((x) => [x.id, x]));
+const nvd = (cve) => `https://nvd.nist.gov/vuln/detail/${encodeURIComponent(cve)}`;
+const hoursAgo = (iso) => (Date.now() - Date.parse(iso)) / 36e5;
+const section = (title, ...kids) => el('section', { class: 'psec' }, el('h2', { text: title }), ...kids.filter(Boolean));
+const itemLink = (x) => el('a', { href: safeUrl(x.url), target: '_blank', rel: 'noopener noreferrer', text: x.title.split(' — ')[0] });
+
+function renderBrief() {
+  const a = state.data.analysis;
+  const byId = itemById();
+  const age = hoursAgo(a.generatedAt);
+  const warn = (a.failStreak ?? 0) > 0
+    ? `最近 ${a.failStreak} 次 AI 更新失敗，以下是 ${ago(a.generatedAt)} 的內容，可能已過時。`
+    : age > 12 ? `這份分析已超過 12 小時沒有更新（${ago(a.generatedAt)}），可能已過時。` : '';
+  const root = el('div', {},
+    el('p', { class: 'ai-note' }, el('span', { class: 'ai-badge', text: 'AI 整理' }),
+      ` ${fmtTaipei(Date.parse(a.generatedAt))}（${ago(a.generatedAt)}）· 只依標題與來源資料判斷，沒有閱讀全文，請以原文為準`),
+    warn ? el('p', { class: 'warn-bar', role: 'alert', text: warn }) : null,
+    a.summary ? el('p', { class: 'lead', text: a.summary }) : null);
+  if (a.actions?.length) {
+    root.append(section('需要行動', el('ol', { class: 'actions' }, ...a.actions.map((x) => el('li', { class: x.urgency === 'high' ? 'high' : '' },
+      el('strong', { text: x.title }), x.urgency === 'high' ? el('span', { class: 'urg', text: '緊急' }) : null,
+      el('p', { text: x.why }),
+      el('div', { class: 'refs' },
+        ...(x.cves ?? []).map((c) => el('a', { href: nvd(c), target: '_blank', rel: 'noopener noreferrer', text: c })),
+        ...(x.itemIds ?? []).map((id) => byId.get(id)).filter(Boolean).map(itemLink)))))));
+  }
+  if (a.highlights?.length) {
+    root.append(section('焦點新聞', el('ul', { class: 'hl' }, ...[...a.highlights].sort((p, q) => q.importance - p.importance).map((h) => {
+      const x = byId.get(h.itemId); if (!x) return null;
+      return el('li', {},
+        el('div', { class: 'hl-top' }, el('span', { class: 'stars', 'aria-label': `重要性 ${h.importance} / 5`, text: '★'.repeat(h.importance) + '☆'.repeat(5 - h.importance) }),
+          el('span', { class: 'src', text: x.source }), STYPE[x.stype] ? el('span', { class: 'stype', text: STYPE[x.stype] }) : null,
+          x.alsoOn?.length ? el('span', { class: 'multi', text: `${x.alsoOn.length + 1} 個來源` }) : null),
+        el('h3', {}, itemLink(x)), el('p', { text: h.summary }), h.impact ? el('p', { class: 'impact', text: `對你的影響：${h.impact}` }) : null);
+    }))));
+  }
+  if (a.divergences?.length) {
+    root.append(section('說法分歧', ...a.divergences.map((d) => el('div', { class: 'div' }, el('h3', { text: d.topic }),
+      el('ul', {}, ...d.claims.map((c) => el('li', {}, el('strong', { text: c.source + '：' }), c.claim))),
+      el('p', { class: 'judge', text: `AI 判斷：${d.judgement}` })))));
+  }
+  if (a.glossary?.length) {
+    root.append(section('名詞小教室', el('dl', { class: 'gloss' }, ...a.glossary.flatMap((g) => [el('dt', { text: g.term }), el('dd', { text: g.definition + (g.why ? `　為什麼重要：${g.why}` : '') })]))));
+  }
+  return root;
+}
+
+function renderSecurity() {
+  const { kev, lifecycle } = state.data;
+  const root = el('div', {}, el('p', { class: 'ai-note', text: '以下為官方資料直接整理，沒有經過 AI。' }));
+  if (kev?.latest?.length) {
+    root.append(section('最新已遭利用漏洞（CISA KEV）',
+      el('p', { class: 'muted', text: `清單共 ${kev.count?.toLocaleString?.() ?? kev.count} 筆 · 版本 ${kev.version ?? '—'} · 列出最近新增的 ${kev.latest.length} 筆` }),
+      el('div', { class: 'tbl-wrap' }, el('table', {},
+        el('thead', {}, el('tr', {}, ...['CVE', '產品', '漏洞', '新增日', '修補期限'].map((h) => el('th', { scope: 'col', text: h })))),
+        el('tbody', {}, ...kev.latest.map((v) => el('tr', {},
+          el('td', {}, el('a', { href: nvd(v.cve), target: '_blank', rel: 'noopener noreferrer', text: v.cve }), v.ransomware ? el('span', { class: 'urg', text: '勒索軟體利用' }) : null),
+          el('td', { text: `${v.vendor} ${v.product}` }), el('td', { text: v.name }), el('td', { text: v.added }), el('td', { text: v.due }))))))));
+  }
+  if (lifecycle?.length) {
+    root.append(section('版本與支援期限（endoflife.date）',
+      el('div', { class: 'tbl-wrap' }, el('table', {},
+        el('thead', {}, el('tr', {}, ...['產品', '版本', '最新修補版', '支援到期'].map((h) => el('th', { scope: 'col', text: h })))),
+        el('tbody', {}, ...lifecycle.flatMap((p) => p.cycles.map((c, i) => el('tr', {},
+          el('td', { text: i === 0 ? p.label : '' }), el('td', { text: c.cycle + (c.lts ? '（LTS）' : '') }), el('td', { text: c.latest ?? '—' }),
+          el('td', {}, c.eol ? `${c.eol}（剩 ${c.daysLeft} 天）` : '尚未訂定', c.soon ? el('span', { class: 'urg', text: '90 天內到期' }) : null)))))))));
+  }
+  return root;
+}
+
 function render() {
+  if (!visibleTabs().some((t) => t.key === state.tab)) state.tab = 'all';
   renderTabs(); renderMeta();
-  const tab = TABS.find((t) => t.key === state.tab);
+  const tab = visibleTabs().find((t) => t.key === state.tab);
+  $('cards-ui').hidden = !!tab.panel; $('panel').hidden = !tab.panel;
+  if (tab.panel) { $('panel').replaceChildren(tab.key === 'brief' ? renderBrief() : renderSecurity()); return; }
   const pool = state.data.items.filter(tab.test);
   renderFilters(pool);
   const q = state.q.trim().toLowerCase();
@@ -225,7 +305,12 @@ $('q').addEventListener('input', (e) => { state.q = e.target.value; render(); })
 $('source').addEventListener('change', (e) => { state.source = e.target.value; render(); });
 $('sort').addEventListener('change', (e) => { state.sort = e.target.value; render(); });
 
-fetch('data/latest.json', { cache: 'no-cache' })
-  .then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); })
+const optionalJson = (url) => fetch(url, { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+
+Promise.all([
+  fetch('data/latest.json', { cache: 'no-cache' }).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); }),
+  optionalJson('data/analysis.json'),
+])
+  .then(([d, analysis]) => { d.analysis = analysis && typeof analysis === 'object' ? analysis : null; return d; })
   .then((d) => { state.data = d; render(); initTranslate(); setInterval(renderMeta, 60000); })
   .catch(() => { $('meta').textContent = '資料載入失敗，請稍後再試。'; });

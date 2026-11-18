@@ -179,3 +179,32 @@ test('mergeHistory：沿用上一輪已抓到的封面圖與「已查過」狀�
   assert.equal(by.b.imgChecked, true);
   assert.equal(by.c.imgChecked, false);
 });
+
+import { pickKev, pickCycles } from '../scripts/security.mjs';
+
+test('pickKev：依新增日期取最近 N 筆並只保留需要的欄位', () => {
+  const k = pickKev({ catalogVersion: 'v1', count: 3, vulnerabilities: [
+    { cveID: 'CVE-1', dateAdded: '2026-11-01', knownRansomwareCampaignUse: 'Unknown', requiredAction: 'a' },
+    { cveID: 'CVE-2', dateAdded: '2026-11-17', knownRansomwareCampaignUse: 'Known', requiredAction: 'b' },
+    { cveID: 'CVE-3', dateAdded: '2026-11-10', knownRansomwareCampaignUse: 'Unknown', requiredAction: 'c' },
+  ] }, 2);
+  assert.deepEqual(k.latest.map((x) => x.cve), ['CVE-2', 'CVE-3']);
+  assert.equal(k.latest[0].ransomware, true);
+  assert.equal(k.count, 3);
+  assert.equal(k.version, 'v1');
+});
+
+test('pickCycles：只留支援期內版本、計算剩餘天數並標示 90 天內到期', () => {
+  const now = Date.parse('2026-11-18T00:00:00Z');
+  const r = pickCycles([
+    { cycle: '3', eol: '2026-12-31', latest: '3.1' },   // 43 天 → soon
+    { cycle: '2', eol: '2025-01-01', latest: '2.9' },   // 已過期 → 排除
+    { cycle: '4', eol: false, latest: '4.0' },          // 無結束日
+    { cycle: '5', eol: '2029-01-01', latest: '5.0' },
+  ], now);
+  assert.deepEqual(r.map((x) => x.cycle), ['3', '4', '5']);
+  assert.equal(r[0].soon, true);
+  assert.equal(r[0].daysLeft, 43);
+  assert.equal(r[1].daysLeft, null);
+  assert.equal(r[1].soon, false);
+});

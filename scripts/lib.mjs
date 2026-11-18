@@ -224,3 +224,89 @@ export function isValidSnapshot(x) {
   return !!x && Array.isArray(x.items) && x.items.every((i) => i && typeof i.id === 'string' && typeof i.url === 'string')
     && (x.sources === undefined || Array.isArray(x.sources));
 }
+
+// ── 來源類型（借鏡「來源透明」：讓讀者知道每則來自官方、媒體還是社群）──
+export const SOURCE_TYPES = {
+  'Hacker News': 'community', Lobsters: 'community', DEV: 'community', 'DEV 職涯': 'community', 'Lobsters 職場文化': 'community',
+  'GitHub 新星專案': 'repo', 'GitHub Blog': 'official',
+  iThome: 'media', 'TechNews 科技新報': 'media', TechOrange: 'media',
+};
+export const sourceTypeOf = (name) => SOURCE_TYPES[name] ?? 'media';
+
+// ── AI 分析：輸入組裝與輸出驗證 ──
+// 輸入只含標題與統計資料；輸出一律不信任，逐欄驗證並丟棄無法對應到真實項目的內容。
+const clip = (s, n) => String(s ?? '')
+  .replace(/https?:\/\/\S+/gi, '')            // 不接受 AI 產生的網址（連結只能來自我們自己的資料）
+  .replace(/[<>`]/g, '')                       // 不留標記字元
+  .replace(/[\u0000-\u001f\u007f]/g, ' ')
+  .replace(/\s+/g, ' ').trim().slice(0, n);
+
+export function buildAnalysisInput(items, kev, limit = 70) {
+  const top = items.filter((x) => !x.stale).slice(0, limit).map((x) => ({
+    id: x.id, source: x.source, type: sourceTypeOf(x.source), title: clip(x.title, 140),
+    score: x.score ?? 0, comments: x.comments ?? 0, tags: x.tags, sources: 1 + (x.alsoOn?.length ?? 0),
+  }));
+  const kevRows = (kev?.latest ?? []).slice(0, 8).map((v) => ({
+    cve: v.cve, vendor: clip(v.vendor, 40), product: clip(v.product, 60), name: clip(v.name, 100),
+    added: v.added, due: v.due, ransomware: !!v.ransomware,
+  }));
+  return { items: top, kev: kevRows };
+}
+
+const arr = (x, max) => (Array.isArray(x) ? x.slice(0, max) : []);
+const int = (n, lo, hi, d) => (Number.isFinite(+n) ? Math.min(hi, Math.max(lo, Math.round(+n))) : d);
+
+export function validateAnalysis(raw, validIds, validCves) {
+  if (!raw || typeof raw !== 'object') return null;
+  const ids = validIds instanceof Set ? validIds : new Set(validIds);
+  const cves = validCves instanceof Set ? validCves : new Set(validCves);
+  const seen = new Set();
+
+  const actions = arr(raw.actions, 5).map((a) => ({
+    title: clip(a?.title, 60), why: clip(a?.why, 160),
+    urgency: a?.urgency === 'high' ? 'high' : 'medium',
+    itemIds: arr(a?.itemIds, 3).filter((id) => ids.has(id)),
+    cves: arr(a?.cves, 3).filter((c) => /^CVE-\d{4}-\d{4,}$/.test(c) && cves.has(c)),
+  })).filter((a) => a.title && a.why);
+
+  const highlights = arr(raw.highlights, 8).map((h) => ({
+    itemId: h?.itemId, summary: clip(h?.summary, 160), impact: clip(h?.impact, 120), importance: int(h?.importance, 1, 5, 3),
+  })).filter((h) => ids.has(h.itemId) && h.summary && !seen.has(h.itemId) && seen.add(h.itemId));
+
+  const divergences = arr(raw.divergences, 3).map((d) => ({
+    topic: clip(d?.topic, 60),
+    claims: arr(d?.claims, 4).map((c) => ({ source: clip(c?.source, 30), claim: clip(c?.claim, 100) })).filter((c) => c.source && c.claim),
+    judgement: clip(d?.judgement, 150),
+  })).filter((d) => d.topic && d.claims.length >= 2 && d.judgement);
+
+  const glossary = arr(raw.glossary, 6).map((g) => ({ term: clip(g?.term, 30), definition: clip(g?.definition, 120), why: clip(g?.why, 120) }))
+    .filter((g) => g.term && g.definition);
+
+  const summary = clip(raw.summary, 300);
+  if (!summary && !actions.length && !highlights.length) return null;
+  return { summary, actions, highlights, divergences, glossary };
+}
+
+export const ANALYSIS_SCHEMA = {
+  type: 'object',
+  properties: {
+    summary: { type: 'string' },
+    actions: { type: 'array', items: { type: 'object', properties: { title: { type: 'string' }, why: { type: 'string' }, urgency: { type: 'string', enum: ['high', 'medium'] }, itemIds: { type: 'array', items: { type: 'string' } }, cves: { type: 'array', items: { type: 'string' } } }, required: ['title', 'why'] } },
+    highlights: { type: 'array', items: { type: 'object', properties: { itemId: { type: 'string' }, summary: { type: 'string' }, impact: { type: 'string' }, importance: { type: 'integer' } }, required: ['itemId', 'summary'] } },
+    divergences: { type: 'array', items: { type: 'object', properties: { topic: { type: 'string' }, claims: { type: 'array', items: { type: 'object', properties: { source: { type: 'string' }, claim: { type: 'string' } }, required: ['source', 'claim'] } }, judgement: { type: 'string' } }, required: ['topic', 'claims', 'judgement'] } },
+    glossary: { type: 'array', items: { type: 'object', properties: { term: { type: 'string' }, definition: { type: 'string' }, why: { type: 'string' } }, required: ['term', 'definition'] } },
+  },
+  required: ['summary', 'actions', 'highlights'],
+};
+
+// 從 claude -p --output-format json 的回應取出分析物件：優先 structured_output，其次 result 內的 JSON
+export function extractAnalysisPayload(stdout) {
+  let outer;
+  try { outer = JSON.parse(stdout); } catch { return null; }
+  if (outer && typeof outer === 'object' && outer.is_error) return null;
+  if (outer?.structured_output && typeof outer.structured_output === 'object') return outer.structured_output;
+  const text = typeof outer?.result === 'string' ? outer.result : '';
+  const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  const body = (fenced ? fenced[1] : text).trim();
+  try { return JSON.parse(body); } catch { return null; }
+}

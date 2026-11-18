@@ -21,6 +21,8 @@
 
 <main class="wrap">
   <nav class="tabs" id="tabs" role="tablist" aria-label="內容分類"></nav>
+  <section id="panel" class="panel" hidden></section>
+  <div id="cards-ui">
   <div class="tools">
     <input id="q" type="search" placeholder="搜尋標題…" aria-label="搜尋標題">
     <select id="source" aria-label="依來源篩選"><option value="">所有來源</option></select>
@@ -35,11 +37,12 @@
   <p class="count" id="count" aria-live="polite"></p>
   <ol class="grid" id="list"></ol>
   <p class="empty" id="empty" hidden>沒有符合條件的內容。</p>
+  </div>
   <details class="status" id="status"><summary>資料來源狀態</summary><ul id="status-list"></ul></details>
 </main>
 
 <footer class="wrap foot">
-  <p>內容版權屬於原網站，本站只彙整標題與連結。排序依各來源的分數／名次與發布時間計算，不經過任何 AI 改寫。
+  <p>內容版權屬於原網站，本站只彙整標題與連結。卡片的排序依各來源的分數／名次與發布時間計算，標題不經過 AI 改寫；「✨ 今日重點」頁籤由 AI 整理（有標示），只依標題與來源資料判斷，請以原文為準。「資安與版本」為官方資料。
   <a href="https://github.com/cornming/dev-intel">原始碼</a></p>
 </footer>
 <script src="assets/translate.js" defer></script>

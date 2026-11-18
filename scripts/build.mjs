@@ -3,8 +3,9 @@ import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { SOURCES } from './sources.mjs';
-import { dedupe, mergeHistory, finalize, nextStreaks } from './lib.mjs';
+import { dedupe, mergeHistory, finalize, nextStreaks, sourceTypeOf } from './lib.mjs';
 import { enrichImages } from './images.mjs';
+import { fetchKev, fetchLifecycle } from './security.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = resolve(ROOT, 'data/latest.json');
@@ -23,6 +24,15 @@ const results = await Promise.all(SOURCES.map(async (s) => {
   }
 }));
 
+// 官方資料面板：失敗時沿用上一輪，並計入來源健康（連續失敗同樣會通知）
+const extra = await Promise.all([
+  ['CISA KEV', 'kev', fetchKev, (d) => d.latest.length],
+  ['endoflife.date', 'lifecycle', fetchLifecycle, (d) => d.length],
+].map(async ([name, key, fn, count]) => {
+  try { const data = await fn(); return { name, key, ok: true, count: count(data), data }; }
+  catch (e) { console.warn(`✗ ${name}: ${e.message}`); return { name, key, ok: false, count: 0, error: String(e.message), data: prev[key] ?? null }; }
+}));
+
 const okCount = results.filter((r) => r.ok).length;
 if (okCount === 0) {
   console.error('所有來源都失敗，保留舊資料，不覆寫。');
@@ -38,14 +48,18 @@ const ranked = finalize(merged, weights, now);
 // 排名高的優先補封面圖；每篇只抓一次，結果存進資料沿用
 const imgStats = await enrichImages(ranked);
 console.log(`封面圖：本輪查 ${imgStats.done}/${imgStats.queued} 篇，找到 ${imgStats.found} 張（${imgStats.ms} ms）`);
-const items = ranked.map(({ order, ...rest }) => rest);
+const items = ranked.map(({ order, ...rest }) => ({ ...rest, stype: sourceTypeOf(rest.source) }));
 
 const out = {
   generatedAt: new Date(now).toISOString(),
-  sources: nextStreaks(prev.sources, results).map(({ name, ok, count, error, failStreak }) => ({ name, ok, count, failStreak, ...(error ? { error } : {}) })),
+  kev: extra[0].data,
+  kevFetchedAt: extra[0].ok ? new Date(now).toISOString() : prev.kevFetchedAt ?? null,
+  lifecycle: extra[1].data,
+  lifecycleFetchedAt: extra[1].ok ? new Date(now).toISOString() : prev.lifecycleFetchedAt ?? null,
+  sources: nextStreaks(prev.sources, [...results, ...extra]).map(({ name, ok, count, error, failStreak }) => ({ name, ok, count, failStreak, ...(error ? { error } : {}) })),
   items,
 };
 await mkdir(dirname(OUT), { recursive: true });
 await writeFile(OUT, JSON.stringify(out) + '\n');
 console.log(`完成：${okCount}/${results.length} 個來源成功，共 ${items.length} 則。`);
-for (const r of results) console.log(`  ${r.ok ? '✓' : '✗'} ${r.name} ${r.count}`);
+for (const r of [...results, ...extra]) console.log(`  ${r.ok ? '✓' : '✗'} ${r.name} ${r.count}`);

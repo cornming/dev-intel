@@ -58,3 +58,32 @@ button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible,su
 .status .bad{color:var(--warn)}
 .foot{color:var(--muted);font-size:.8rem;padding-top:8px;padding-bottom:32px}
 @media (max-width:520px){.meta{text-align:left}}
+
+.stype{font-size:.72rem;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:0 6px}
+.multi{font-size:.72rem;color:var(--accent);border:1px solid var(--accent);border-radius:6px;padding:0 6px}
+.panel{margin:16px 0 8px}
+.psec{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:0 0 16px}
+.psec h2{font-size:1.1rem;margin:0 0 10px}
+.psec h3{font-size:1rem;margin:0 0 4px;line-height:1.45}
+.lead{font-size:1.05rem;line-height:1.7;margin:8px 0 16px}
+.ai-note{color:var(--muted);font-size:.85rem;margin:0 0 8px}
+.ai-badge{background:var(--accent);color:#fff;border-radius:6px;padding:1px 8px;font-weight:600;font-size:.78rem}
+.warn-bar{background:#fff4e5;color:#8a4b00;border:1px solid #f3c98b;border-radius:8px;padding:8px 12px;margin:8px 0;font-size:.9rem}
+@media (prefers-color-scheme:dark){.warn-bar{background:#3a2a10;color:#fbbf24;border-color:#6b4a14}}
+.actions{margin:0;padding-left:22px;display:grid;gap:12px}
+.actions li p{margin:2px 0 4px;color:var(--muted)}
+.actions li.high strong{color:#c2410c}
+.urg{margin-left:8px;font-size:.72rem;font-weight:600;color:#fff;background:#dc2626;border-radius:6px;padding:1px 7px;white-space:nowrap}
+.refs{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:.85rem}
+.hl{list-style:none;margin:0;padding:0;display:grid;gap:14px}
+.hl li{border-top:1px solid var(--line);padding-top:12px}.hl li:first-child{border-top:0;padding-top:0}
+.hl-top{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;font-size:.78rem;margin-bottom:4px}
+.stars{color:#d97706;letter-spacing:1px}
+.hl p{margin:2px 0;overflow-wrap:anywhere}.impact{color:var(--muted);font-size:.9rem}
+.div h3{margin-top:6px}.judge{color:var(--accent);font-weight:600}
+.gloss dt{font-weight:600;margin-top:10px}.gloss dd{margin:2px 0 0;color:var(--muted)}
+.tbl-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th,td{text-align:left;padding:6px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600;white-space:nowrap}
+.muted{color:var(--muted);font-size:.85rem;margin:0 0 8px}
