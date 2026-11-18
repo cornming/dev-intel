@@ -2,27 +2,53 @@ name: 更新情報並部署
 
 on:
   schedule:
-    # 台北時間 00:00 / 05:00 / 10:00 / 15:00 / 20:00（UTC+8，沒有日光節約）
-    # 換算成 UTC：16:00（前一日）/ 21:00（前一日）/ 02:00 / 07:00 / 12:00
-    - cron: '0 2,7,12,16,21 * * *'
+    # 每小時檢查一次（第 23 分：避開整點壅塞，GitHub 在整點附近常延遲或略過排程）。
+    # 是否真的更新由「守門」決定：台北 00／05／10／15／20 點的預定時段，或資料超過 5.5 小時沒更新（補跑）。
+    - cron: '23 * * * *'
   workflow_dispatch:
   push:
     branches: [main]
-    paths-ignore: ['data/**', 'README.md']
-
-concurrency:
-  group: update-and-deploy
-  cancel-in-progress: false
+    # 只改文件、測試、AI 規則時不重新部署網站（測試由 ci.yml 負責）
+    paths-ignore: ['data/**', 'README.md', '*.md', 'docs/**', 'test/**', 'ai/**', '.github/workflows/ci.yml']
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 jobs:
+  gate:
+    name: 守門（要不要更新）
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    outputs:
+      run: ${{ steps.g.outputs.run }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: scripts/gate.mjs
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - id: g
+        run: node scripts/gate.mjs
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          LATEST_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/data/latest.json
+
   update:
+    name: 抓取、分析並部署
+    needs: gate
+    if: needs.gate.outputs.run == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    # 同一時間只部署一個；排隊中的只保留最新一個（它會取最新的 main，所以不會漏掉任何變更）
+    concurrency:
+      group: update-and-deploy
+      cancel-in-progress: false
     environment:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}

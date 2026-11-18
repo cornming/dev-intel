@@ -1,0 +1,22 @@
+name: 測試
+
+# 只改文件、測試、AI 規則時，update.yml 不會重新部署；這裡負責跑測試，確保這些變更沒有弄壞東西。
+on:
+  push:
+    branches: [main]
+    paths: ['*.md', 'docs/**', 'test/**', 'ai/**', '.github/workflows/ci.yml']
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm test
