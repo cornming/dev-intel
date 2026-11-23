@@ -11,7 +11,12 @@ const visibleTabs = () => [...PANEL_TABS.filter((t) => t.when(state.data)), ...T
 const STYPE = { official: '官方', media: '媒體', community: '社群', repo: '開源專案' };
 const $ = (id) => document.getElementById(id);
 const watchStore = DevWatch.createStore(DevWatch.localAdapter()); // 我的追蹤（目前存在這個瀏覽器；之後可換成帳號同步的 adapter）
-const state = { data: null, tab: UrlState.DEFAULT_TAB, tag: '', source: '', sort: 'hot', q: '' };
+// onlyNew（只看上次造訪後新增）是個人的、與造訪時間綁定的篩選，分享網址沒有意義，所以不寫進網址
+const state = { data: null, tab: UrlState.DEFAULT_TAB, tag: '', source: '', sort: 'hot', q: '', onlyNew: false };
+// 上次造訪的時間（第一次造訪或瀏覽器不保存資料時為 null）。存取 localStorage 本身就可能丟例外（被封鎖時），所以包起來
+const safeStore = (name) => { try { return window[name]; } catch { return null; } };
+const visitBase = DevFresh.visitBaseline(safeStore('localStorage'), safeStore('sessionStorage'), Date.now());
+let newIds = new Set(); // 6 小時內第一次收錄的項目 id（每次 render 重算）
 
 function nextRun(now = Date.now()) {
   const TZ = 8 * 36e5;
@@ -113,6 +118,7 @@ function staleNote(x) {
 function card(x) {
   const { head, text } = DevTranslate.splitTitle(x);
   const info = el('div', { class: 'info' },
+    newIds.has(x.id) ? el('span', { class: 'newbadge', title: `本站 ${ago(x.firstSeen)}第一次收錄`, text: '新' }) : null,
     el('span', { class: `src${x.region === 'tw' ? ' tw' : ''}`, text: x.source }),
     STYPE[x.stype] ? el('span', { class: 'stype', text: STYPE[x.stype] }) : null,
     ...x.tags.map((t) => el('span', { class: 'tag', text: t })),
@@ -296,14 +302,24 @@ function render() {
   const pool = state.data.items.filter(tab.test);
   if (state.tag && !pool.some((x) => tagsOf(x).includes(state.tag))) state.tag = '';
   renderFilters(pool);
+  newIds = DevFresh.markNew(state.data.items, Date.now());
+  const hasBase = visitBase !== null;
+  const onlyNew = state.onlyNew && hasBase;
+  const nb = $('new-btn');
+  nb.disabled = !hasBase;
+  nb.setAttribute('aria-pressed', String(onlyNew));
+  nb.textContent = hasBase ? `🆕 上次造訪後新增 ${DevFresh.sinceCount(pool, visitBase)}` : '🆕 上次造訪後新增';
+  nb.title = hasBase ? `只看 ${fmtTaipei(visitBase)} 上次造訪之後，本站新收錄的內容` : '這是你第一次造訪（或瀏覽器不保存資料）；下次造訪起，這裡會列出上次之後新增的內容';
   const q = state.q.trim().toLowerCase();
-  let list = pool.filter((x) => (!state.tag || tagsOf(x).includes(state.tag)) && (!state.source || x.source === state.source) && (!q || x.title.toLowerCase().includes(q)));
+  let list = pool.filter((x) => (!state.tag || tagsOf(x).includes(state.tag)) && (!state.source || x.source === state.source) && (!q || x.title.toLowerCase().includes(q))
+    && (!onlyNew || Date.parse(x.firstSeen) > visitBase));
   list = [...list].sort(state.sort === 'new'
     ? (a, b) => Date.parse(b.time ?? b.firstSeen) - Date.parse(a.time ?? a.firstSeen)
     : (a, b) => b.hot - a.hot);
   registry.clear();
   $('list').replaceChildren(...list.slice(0, 120).map(card));
-  $('count').textContent = `共 ${list.length} 則${list.length > 120 ? '（顯示前 120 則）' : ''}`;
+  $('count').textContent = `共 ${list.length} 則${list.length > 120 ? '（顯示前 120 則）' : ''}${onlyNew ? `・只顯示 ${fmtTaipei(visitBase)} 上次造訪後新增的` : ''}`;
+  $('empty').textContent = onlyNew ? '上次造訪之後，這個條件下沒有新收錄的內容。' : '沒有符合條件的內容。';
   $('empty').hidden = list.length > 0;
   $('status-list').replaceChildren(...state.data.sources.map((s) =>
     el('li', { class: s.ok ? '' : 'bad', text: `${s.ok ? '✓' : '✗'} ${s.name}：${s.ok ? s.count + ' 則' : `本輪抓取失敗${s.failStreak > 1 ? `（已連續 ${s.failStreak} 輪）` : ''}，沿用舊資料`}` })));
@@ -332,6 +348,7 @@ $('q').addEventListener('input', (e) => {
 });
 $('source').addEventListener('change', (e) => { state.source = e.target.value; commit(false); });
 $('sort').addEventListener('change', (e) => { state.sort = e.target.value; commit(false); });
+$('new-btn').addEventListener('click', () => { state.onlyNew = !state.onlyNew; render(); });
 window.addEventListener('popstate', () => { if (state.data) { applyUrl(); render(); } }); // 上一頁／下一頁
 
 const optionalJson = (url) => fetch(url, { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
