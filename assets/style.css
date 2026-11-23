@@ -28,6 +28,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible,su
 .tr-btn{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:8px;padding:8px 14px;white-space:nowrap}
 .tr-btn[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:#fff}
 .tr-btn:disabled{opacity:.55;cursor:not-allowed}
+.newbadge{background:var(--accent);color:#fff;border-radius:6px;padding:0 6px;font-weight:700;font-size:.72rem;line-height:1.5}
+@media (prefers-color-scheme:dark){.newbadge{color:#0e1116}}
 .tr-status{min-height:1.4em;margin:6px 0 0;color:var(--muted);font-size:.85rem}
 .grid{list-style:none;margin:0;padding:0;display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr))}
 .card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;transition:box-shadow .15s,transform .15s}
