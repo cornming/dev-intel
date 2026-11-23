@@ -52,6 +52,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible,su
 .tag{border:1px solid var(--line);border-radius:6px;padding:0 6px}
 .info a{color:var(--muted)}
 .stale{color:var(--warn)}
+.offlist{opacity:.7}
 .empty{text-align:center;color:var(--muted);padding:32px 0}
 .status{margin:24px 0;color:var(--muted);font-size:.85rem}
 .status ul{padding-left:20px}
