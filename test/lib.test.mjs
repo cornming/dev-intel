@@ -94,6 +94,30 @@ test('mergeHistory 保留近期舊項目並標記 stale，超過 ttl 則移除',
   assert.equal(by.new.firstSeen, '2026-11-18T00:00:00.000Z');
 });
 
+test('mergeHistory：只有「來源本輪抓取失敗」的舊項目才標 down；來源正常但掉出榜單只是 stale', () => {
+  const now = Date.parse('2026-11-18T00:00:00Z');
+  const prev = [
+    { id: 'a', source: 'iThome', firstSeen: '2026-11-17T12:00:00Z' },
+    { id: 'b', source: 'Hacker News', firstSeen: '2026-11-17T12:00:00Z' },
+    { id: 'c', source: 'iThome', firstSeen: '2026-11-17T12:00:00Z' },
+  ];
+  // iThome 抓取失敗；Hacker News 正常但 b 掉出榜單；c 仍在榜上
+  const by = Object.fromEntries(mergeHistory(prev, [{ id: 'c', source: 'iThome' }], now, undefined, new Set(['iThome'])).map((x) => [x.id, x]));
+  assert.equal(by.a.stale, true); assert.equal(by.a.down, true);
+  assert.equal(by.b.stale, true); assert.equal(by.b.down, false);
+  assert.equal(by.c.stale, false); assert.equal(by.c.down, false);
+  // 沒傳 downSources（舊呼叫方式）時，一律不算故障；也接受陣列
+  assert.equal(mergeHistory(prev, [], now).every((x) => x.down === false), true);
+  assert.equal(mergeHistory(prev, [], now, undefined, ['Hacker News']).find((x) => x.id === 'b').down, true);
+});
+
+test('mergeHistory：上一輪是 down、這一輪來源恢復並重新抓到時，down 與 stale 都清掉', () => {
+  const now = Date.parse('2026-11-18T00:00:00Z');
+  const prev = [{ id: 'a', source: 'iThome', firstSeen: '2026-11-17T12:00:00Z', stale: true, down: true }];
+  const out = mergeHistory(prev, [{ id: 'a', source: 'iThome' }], now);
+  assert.equal(out[0].stale, false); assert.equal(out[0].down, false);
+});
+
 test('finalize：同來源分數高者排前；時間越久越低；stale 打折', () => {
   const now = Date.parse('2026-11-18T00:00:00Z');
   const mk = (id, score, time, extra = {}) => ({ id, source: 'S', score, time, order: 0, ...extra });

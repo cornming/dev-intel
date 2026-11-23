@@ -232,14 +232,18 @@ export function retag(it) {
   return [...new Set(merged)].slice(0, 3);
 }
 
-export function mergeHistory(prev = [], fresh = [], now = Date.now(), ttlMs = 72 * 36e5) {
+// stale：這一輪的抓取結果裡沒有這則（例如掉出來源的熱門榜），仍暫時保留。
+// down：stale 的同時，它的來源「本輪抓取失敗」——這時才是來源故障；來源正常卻掉出榜單不算故障。
+// downSources：本輪抓取失敗的來源名稱（Set 或陣列）。
+export function mergeHistory(prev = [], fresh = [], now = Date.now(), ttlMs = 72 * 36e5, downSources = []) {
+  const down = downSources instanceof Set ? downSources : new Set(downSources);
   const nowIso = new Date(now).toISOString();
   const prevById = new Map(prev.map((x) => [x.id, x]));
   const freshIds = new Set(fresh.map((x) => x.id));
   const merged = fresh.map((x) => {
     const old = prevById.get(x.id);
     return {
-      ...x, firstSeen: old?.firstSeen ?? nowIso, stale: false,
+      ...x, firstSeen: old?.firstSeen ?? nowIso, stale: false, down: false,
       // 圖片只抓一次：沿用上一輪的結果（含「已查過但沒有圖」）
       image: x.image ?? old?.image ?? null,
       imgChecked: !!(x.image || old?.imgChecked),
@@ -248,7 +252,7 @@ export function mergeHistory(prev = [], fresh = [], now = Date.now(), ttlMs = 72
   for (const old of prev) {
     if (freshIds.has(old.id)) continue;
     if (now - Date.parse(old.firstSeen ?? nowIso) > ttlMs) continue;
-    merged.push({ ...old, stale: true, tags: retag(old) });
+    merged.push({ ...old, stale: true, down: down.has(old.source), tags: retag(old) });
   }
   return merged;
 }

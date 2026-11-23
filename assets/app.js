@@ -103,6 +103,13 @@ function mediaFor(x) {
   return fig;
 }
 
+// 這一輪沒抓到的舊項目：來源真的故障才用警示色；來源正常、只是掉出熱門榜，用淡色說明即可
+function staleNote(x) {
+  if (!x.stale) return null;
+  return x.down ? el('span', { class: 'stale', text: '（來源暫時無更新）' })
+    : el('span', { class: 'offlist', title: '來源運作正常，這則已不在該來源目前的熱門榜單，本站暫時保留近期內容', text: '（已不在來源榜單）' });
+}
+
 function card(x) {
   const { head, text } = DevTranslate.splitTitle(x);
   const info = el('div', { class: 'info' },
@@ -114,7 +121,7 @@ function card(x) {
     x.discuss && x.comments ? el('a', { href: safeUrl(x.discuss), target: '_blank', rel: 'noopener noreferrer', text: `💬 ${x.comments}` }) : null,
     x.alsoOn?.length ? el('span', { class: 'multi', title: `也在 ${x.alsoOn.join('、')}`, text: `${x.alsoOn.length + 1} 個來源` }) : null,
     el('span', { text: ago(x.time ?? x.firstSeen) }),
-    x.stale ? el('span', { class: 'stale', text: '（來源暫時無更新）' }) : null,
+    staleNote(x),
   );
   const link = el('a', { href: safeUrl(x.url), target: '_blank', rel: 'noopener noreferrer', text: x.kind === 'repo' ? head : text });
   const li = el('li', { class: 'card' },

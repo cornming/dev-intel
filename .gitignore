@@ -4,3 +4,4 @@ _site/
 data/latest.json
 feeds/
 feed.xml
+data/history.json

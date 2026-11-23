@@ -46,7 +46,9 @@ const weights = Object.fromEntries(SOURCES.map((s) => [s.name, s.weight]));
 const fresh = dedupe(results.flatMap((r) => r.items));
 // 已從來源清單移除的來源，其舊項目不再保留
 const known = new Set(SOURCES.map((s) => s.name));
-const merged = mergeHistory(prev.items.filter((x) => known.has(x.source)), fresh, now);
+// 本輪抓取失敗的來源：它們的舊項目才標示「來源暫時無更新」；來源正常、只是掉出熱門榜的不算故障
+const downSources = new Set(results.filter((r) => !r.ok).map((r) => r.name));
+const merged = mergeHistory(prev.items.filter((x) => known.has(x.source)), fresh, now, undefined, downSources);
 const ranked = finalize(merged, weights, now);
 // 排名高的優先補封面圖；每篇只抓一次，結果存進資料沿用
 const imgStats = await enrichImages(ranked);

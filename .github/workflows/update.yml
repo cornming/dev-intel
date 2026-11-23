@@ -51,7 +51,7 @@ jobs:
       cancel-in-progress: false
     environment:
       name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
+      url: ${{ steps.deploy.outputs.page_url || steps.deploy_retry.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -68,6 +68,7 @@ jobs:
           PREV_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/data/latest.json
           PREV_HISTORY_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/data/history.json
       - name: 抓取各來源
+        id: build
         run: npm run build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -79,8 +80,19 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
+      # 部署偶爾會因平台暫時性問題失敗（實測：上傳後立刻回報「找不到 artifact」，約 1 秒就失敗）。
+      # 資料不進 git，這一輪若白跑就得等下一輪，所以失敗時等一下再試一次。
       - id: deploy
         uses: actions/deploy-pages@v4
-      # 放在部署之後：來源異常時網站照常更新，但讓這次執行轉紅，GitHub 會寄失敗通知信
+        continue-on-error: true
+      - name: 部署失敗，等 30 秒後重試
+        if: steps.deploy.outcome == 'failure'
+        run: sleep 30
+      - id: deploy_retry
+        if: steps.deploy.outcome == 'failure'
+        uses: actions/deploy-pages@v4
+      # 放在部署之後：來源異常時網站照常更新，但讓這次執行轉紅，GitHub 會寄失敗通知信。
+      # 用 !cancelled() 而不是預設的「前面都成功」：就算部署失敗，只要這一輪有抓到資料，來源異常仍要通知。
       - name: 檢查來源健康
+        if: ${{ !cancelled() && steps.build.conclusion == 'success' }}
         run: node scripts/check-health.mjs
