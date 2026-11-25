@@ -12,7 +12,7 @@ const STYPE = { official: '官方', media: '媒體', community: '社群', repo: 
 const $ = (id) => document.getElementById(id);
 const watchStore = DevWatch.createStore(DevWatch.localAdapter()); // 我的追蹤（目前存在這個瀏覽器；之後可換成帳號同步的 adapter）
 // onlyNew（只看上次造訪後新增）是個人的、與造訪時間綁定的篩選，分享網址沒有意義，所以不寫進網址
-const state = { data: null, tab: UrlState.DEFAULT_TAB, tag: '', source: '', sort: 'hot', q: '', onlyNew: false };
+const state = { data: null, tab: UrlState.DEFAULT_TAB, tag: '', source: '', sort: 'hot', q: '', win: '24h', onlyNew: false };
 // 上次造訪的時間（第一次造訪或瀏覽器不保存資料時為 null）。存取 localStorage 本身就可能丟例外（被封鎖時），所以包起來
 const safeStore = (name) => { try { return window[name]; } catch { return null; } };
 const visitBase = DevFresh.visitBaseline(safeStore('localStorage'), safeStore('sessionStorage'), Date.now());
@@ -288,7 +288,8 @@ function renderSecurity() {
 }
 
 function renderDash() {
-  return DevDash.render({ data: state.data, history: state.data.history, analysis: state.data.analysis, store: watchStore, onChange: () => render() });
+  return DevDash.render({ data: state.data, history: state.data.history, analysis: state.data.analysis, store: watchStore, onChange: () => render(),
+    win: state.win, onWin: (w) => { state.win = w; commit(false); } });
 }
 
 function render() {

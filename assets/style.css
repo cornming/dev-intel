@@ -121,13 +121,20 @@ th{color:var(--muted);font-weight:600;white-space:nowrap}
 .dash .rowbtn{grid-template-columns:minmax(84px,150px) 1fr 38px 34px minmax(0,auto)}
 .dash .rowbtn.ent{grid-template-columns:minmax(84px,150px) 1fr 38px 34px minmax(0,auto)}
 .dash .gaprow{grid-template-columns:minmax(84px,150px) 1fr 52px}
+/* 近 24 小時模式沒有「＋N」欄 */
+.dash .rowbtn.w24{grid-template-columns:minmax(84px,150px) 1fr 38px minmax(0,auto)}
+@media (max-width:600px){
+  .dash .rowbtn{grid-template-columns:minmax(72px,108px) 1fr 30px 30px minmax(0,auto);gap:6px}
+  .dash .rowbtn.w24{grid-template-columns:minmax(72px,108px) 1fr 30px minmax(0,auto)}
+  .dash .rowbtn.ent .dchips{display:none}
+}
 .dash .rowbtn:hover,.dash .gaprow:hover{background:var(--accent-soft)}
 .dash .nm{font-size:.86rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .dash .num{font-size:.85rem;color:var(--muted);text-align:right;font-variant-numeric:tabular-nums}
 .dash .new{font-size:.74rem;color:var(--muted);font-variant-numeric:tabular-nums}
 .dash .track{display:flex;height:14px;gap:2px;align-items:center}
 .dash .seg{display:block;height:14px;min-width:2px;border-radius:2px}
-.dash .chg{font-size:.74rem;font-weight:600;color:var(--muted)}.dash .chg.up{color:var(--ok)}.dash .chg.down{color:#d03b3b}
+.dash .chg{font-size:.74rem;font-weight:600;color:var(--muted);min-width:46px;text-align:right}.dash .chg.up{color:var(--ok)}.dash .chg.down{color:#d03b3b}
 .dash .axis-cap{display:flex;justify-content:space-between;font-size:.74rem;color:var(--muted);margin:0 52px 4px 160px}
 .dash .dtrack{position:relative;height:14px}
 .dash .dtrack::before{content:"";position:absolute;left:50%;top:-3px;bottom:-3px;width:1px;background:var(--line)}
@@ -173,6 +180,27 @@ th{color:var(--muted);font-weight:600;white-space:nowrap}
 .dash .tbl-wrap{overflow-x:auto}
 .dash table{border-collapse:collapse;width:100%;font-size:.86rem}.dash th,.dash td{text-align:left;padding:6px 10px;border-bottom:1px solid var(--line)}.dash th{color:var(--muted);font-weight:600}.dash td.n{text-align:right;font-variant-numeric:tabular-nums}
 .dash .spark{width:110px;height:26px;display:block}
+/* 時間範圍切換 */
+.dash .dwin{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;font-size:.84rem}
+.dash .dwin-l{font-weight:600}.dash .dwin-n{color:var(--muted);font-size:.78rem}
+.dash .seg-ctl{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--card)}
+.dash .seg-ctl button{font:inherit;font-size:.84rem;border:0;background:none;color:var(--text);padding:5px 12px;cursor:pointer;white-space:nowrap}
+.dash .seg-ctl button+button{border-left:1px solid var(--line)}
+.dash .seg-ctl button[aria-pressed=true]{background:var(--accent);color:#fff}
+.dash .seg-ctl button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+/* 今日升溫／降溫 */
+.dash .liftcols{display:grid;gap:8px 24px;grid-template-columns:minmax(0,3fr) minmax(0,2fr)}
+@media (max-width:900px){.dash .liftcols{grid-template-columns:1fr}}
+.dash .liftcols h3{font-size:.86rem;margin:4px 0 4px;color:var(--muted)}
+.dash .liftrow{display:grid;grid-template-columns:40px minmax(70px,140px) minmax(40px,1fr) 52px;grid-template-areas:"k n b v" ". d d d";align-items:center;gap:2px 8px;width:100%;font:inherit;color:inherit;background:none;border:0;border-radius:8px;padding:5px 6px;margin:1px 0;cursor:pointer;text-align:left}
+.dash .liftrow:hover{background:var(--accent-soft)}
+.dash .liftrow .pill{grid-area:k;justify-self:start}.dash .liftrow .nm{grid-area:n}.dash .liftrow .ltrack{grid-area:b}
+.dash .liftrow .lnum{grid-area:v;text-align:right;font-weight:700;font-size:.85rem;font-variant-numeric:tabular-nums}
+.dash .liftrow.up .lnum{color:var(--ok)}.dash .liftrow.down .lnum{color:#d03b3b}
+.dash .liftrow .ldet{grid-area:d;font-size:.74rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.dash .ltrack{display:block;height:10px;background:var(--bg);border-radius:3px;overflow:hidden}
+.dash .ltrack i{display:block;height:100%;background:var(--ok);border-radius:3px}.dash .ltrack i.dn{background:#d03b3b;opacity:.7}
+.dash td.n.up{color:var(--ok)}.dash td.n.down{color:#d03b3b}.dash td.n.weak{color:var(--muted)}
 .dash .defs summary{cursor:pointer;font-weight:600}.dash .defs ul{margin:8px 0 0;padding-left:20px;font-size:.86rem;color:var(--muted);display:grid;gap:4px}
 /* 證據面板（右側抽屜） */
 .ev-back{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.42);display:flex;justify-content:flex-end}

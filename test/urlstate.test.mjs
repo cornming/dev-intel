@@ -27,9 +27,9 @@ test('build：只寫出非預設的欄位，中文會被編碼', () => {
 });
 
 test('parse ∘ build 可以還原（來回一致）', () => {
-  const st = { tab: 'repo', tag: 'AI', source: 'GitHub 新星專案', sort: 'new', q: 'rust & go' };
+  const st = { tab: 'repo', tag: 'AI', source: 'GitHub 新星專案', sort: 'new', q: 'rust & go', win: 'all' };
   assert.equal(pick(parse(build(st), TABS)), pick(st));
-  const def = { tab: 'dash', tag: '', source: '', sort: 'hot', q: '' };
+  const def = { tab: 'dash', tag: '', source: '', sort: 'hot', q: '', win: '24h' };
   assert.equal(pick(parse(build(def), TABS)), pick(def));
 });
 
@@ -45,8 +45,8 @@ test('parse：長度限制、控制字元與空白被處理；空網址與壞輸
   assert.equal(r.q.length, 100); assert.equal(r.tag.length, 30); assert.equal(r.source.length, 40);
   assert.equal(parse('?q=%00%01hi%1f', TABS).q, 'hi');
   assert.equal(parse('?q=%20%20abc%20', TABS).q, 'abc');
-  assert.equal(pick(parse('', TABS)), pick({ tab: 'dash', tag: '', source: '', sort: 'hot', q: '' }));
-  assert.equal(pick(parse(undefined, TABS)), pick({ tab: 'dash', tag: '', source: '', sort: 'hot', q: '' }));
+  assert.equal(pick(parse('', TABS)), pick({ tab: 'dash', tag: '', source: '', sort: 'hot', q: '', win: '24h' }));
+  assert.equal(pick(parse(undefined, TABS)), pick({ tab: 'dash', tag: '', source: '', sort: 'hot', q: '', win: '24h' }));
   assert.doesNotThrow(() => parse('?%E0%A4%A', TABS));
 });
 
@@ -54,4 +54,13 @@ test('parse：網址中的惡意內容只當作文字，不含任何會被執行
   const r = parse('?q=%3Cscript%3Ealert(1)%3C%2Fscript%3E&tag=%22%3E%3Cimg%20src%3Dx%3E', TABS);
   assert.equal(typeof r.q, 'string');           // 後續一律以 textContent／input.value 使用，不會被當成 HTML
   assert.equal(r.tab, 'dash');
+});
+
+test('win（儀表板時間範圍）：預設 24h 不寫進網址；all 會寫出並能讀回；不合法的退回 24h', () => {
+  assert.equal(build({ tab: 'dash', tag: '', source: '', sort: 'hot', q: '', win: '24h' }), '');
+  assert.equal(build({ tab: 'dash', tag: '', source: '', sort: 'hot', q: '', win: 'all' }), '?win=all');
+  assert.equal(build({ tab: 'dash', tag: '', source: '', sort: 'hot', q: '', win: '<script>' }), '');
+  assert.equal(parse('?win=all', TABS).win, 'all');
+  assert.equal(parse('?win=7d', TABS).win, '24h');
+  assert.equal(parse('?win=', TABS).win, '24h');
 });
