@@ -21,6 +21,11 @@
   const fmtTime = (ms) => new Intl.DateTimeFormat('zh-TW', { timeZone: 'Asia/Taipei', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false }).format(ms);
   const ago = (ms, now) => { const m = Math.max(0, Math.round((now - ms) / 6e4)); return m < 60 ? `${m} 分鐘前` : m < 1440 ? `${Math.floor(m / 60)} 小時前` : `${Math.floor(m / 1440)} 天前`; };
   const pct = (a, b) => (b ? Math.round((a / b) * 100) : 0);
+  const pct1 = (x) => (x == null ? '—' : (x * 100).toFixed(1));            // 0.2117 → "21.2"
+  const signed = (n) => `${n > 0 ? '+' : ''}${n}`;
+  const KIND_LABEL = { industry: '產業', entity: '公司', topic: '主題' };
+  // 昨日與平常日均都不到門檻篇數時，百分比變化會亂跳（例如 1 篇變 4 篇＝+300%），不顯示箭頭、表格中改成淡色
+  const smallSample = (d) => d.last < D.LIFT_DEFAULTS.minCount && d.avg < D.LIFT_DEFAULTS.minCount;
 
   // ───────── 證據面板：點任何數字，列出背後的原始文章與連結 ─────────
   let drawer;
@@ -74,9 +79,12 @@
 
   function spark(series, w = 110, h = 26) {
     const svg = document.createElementNS(NS, 'svg'); svg.setAttribute('viewBox', `0 0 ${w} ${h}`); svg.setAttribute('class', 'spark'); svg.setAttribute('role', 'img');
-    const max = Math.max(1, ...series.map((p) => p.v)); const step = series.length > 1 ? (w - 4) / (series.length - 1) : 0;
-    const pts = series.map((p, i) => `${2 + i * step},${h - 3 - (p.v / max) * (h - 8)}`);
-    svg.setAttribute('aria-label', `近 ${series.length} 天：${series.map((p) => p.v).join('、')} 篇`);
+    // 有占比就畫占比（扣掉每天總量起伏的影響），沒有才畫篇數
+    const useShare = series.some((p) => p.share != null);
+    const val = (p) => (useShare ? p.share ?? 0 : p.v);
+    const max = Math.max(useShare ? 1e-9 : 1, ...series.map(val)); const step = series.length > 1 ? (w - 4) / (series.length - 1) : 0;
+    const pts = series.map((p, i) => `${2 + i * step},${h - 3 - (val(p) / max) * (h - 8)}`);
+    svg.setAttribute('aria-label', `近 ${series.length} 天占當天比例：${series.map((p) => (useShare ? `${pct1(p.share)}%` : `${p.v} 篇`)).join('、')}`);
     const line = document.createElementNS(NS, 'polyline'); line.setAttribute('points', pts.join(' ')); line.setAttribute('fill', 'none'); line.setAttribute('stroke', 'var(--c-tw)'); line.setAttribute('stroke-width', '2'); line.setAttribute('stroke-linejoin', 'round');
     svg.append(line); return svg;
   }
@@ -85,7 +93,11 @@
   function render(ctx) {
     const { data, history, analysis, store, onChange } = ctx;
     const now = ctx.now ?? Date.now();
-    const items = data.items; // 與「全部」頁籤同一個總數（含來源暫時沒有更新、但仍在近 3 天內的報導），避免出現兩個不同的總數
+    const win = D.WINDOWS.includes(ctx.win) ? ctx.win : '24h';
+    const is24 = win === '24h';
+    const all = data.items; // 與「全部」頁籤同一個總數（含來源暫時沒有更新的保留項目）
+    // 預設只看近 24 小時：全部收錄約 3 天，篇數最多的產業每天都排前面，看不出當天的變化
+    const items = D.inWindow(all, win, now);
     const byId = new Map(items.map((x) => [x.id, x]));
     const indName = Object.fromEntries((data.taxonomy?.industries ?? []).map((i) => [i.id, i.name]));
     const entMap = Object.fromEntries((data.taxonomy?.entities ?? []).map((e) => [e.id, e]));
@@ -94,6 +106,14 @@
     const trendOf = (kind, key) => D.trend(history, kind, key, now);
     const rootEl = el('div', { class: 'dash' });
     const ev = (o) => openEvidence({ now, store, onChange, ...o });
+    const scope = is24 ? '近 24 小時' : '全部收錄';
+
+    // 時間範圍切換（記在網址：?win=all；預設 24 小時不寫進網址）
+    const segBtn = (key, text) => el('button', { type: 'button', 'aria-pressed': String(win === key), text, onclick: () => { if (key !== win) ctx.onWin?.(key); } });
+    rootEl.append(el('div', { class: 'dwin', role: 'group', 'aria-label': '儀表板的時間範圍' },
+      el('span', { class: 'dwin-l', text: '時間範圍' }),
+      el('span', { class: 'seg-ctl' }, segBtn('24h', `近 24 小時・${all.filter((x) => now - D.timeOf(x) < 864e5).length} 篇`), segBtn('all', `全部收錄・${all.length} 篇`)),
+      el('span', { class: 'dwin-n', text: is24 ? '依發布時間；產業、公司、落差都只算這段期間。' : '全部收錄約涵蓋 3 天，篇數多的產業會長期排在前面。' })));
 
     // 說明列：指標定義與資料限制（解讀前要知道的事）
     const days = D.completeDays(history, now).length;
@@ -106,38 +126,44 @@
 
     // KPI
     const topInd = indRows[0], topEnt = entRows[0];
-    const last24 = items.filter((x) => now - D.timeOf(x) < 864e5);
+    const last24 = all.filter((x) => now - D.timeOf(x) < 864e5);
     const kpi = (v, l, n, onClick) => {
       const body = [el('div', { class: 'v', text: v }), el('div', { class: 'l', text: l }), el('div', { class: 'n', text: n })];
       return onClick ? el('button', { type: 'button', class: 'dcard kpi btn-card', onclick: onClick }, ...body) : el('div', { class: 'dcard kpi' }, ...body);
     };
     const row0 = el('div', { class: 'kpis' },
-      kpi(items.length.toLocaleString('en-US'), '收錄文章', `近 24 小時發布 ${last24.length} 篇`, () => ev({ title: '所有收錄文章', sub: '依熱度排序。', items: [...items].sort((a, b) => b.hot - a.hot) })),
+      is24
+        ? kpi(items.length.toLocaleString('en-US'), '近 24 小時發布', `全部收錄 ${all.length} 篇`, () => ev({ title: '近 24 小時發布的文章', sub: '依熱度排序。', items: [...items].sort((a, b) => b.hot - a.hot) }))
+        : kpi(items.length.toLocaleString('en-US'), '收錄文章', `近 24 小時發布 ${last24.length} 篇`, () => ev({ title: '所有收錄文章', sub: '依熱度排序。', items: [...items].sort((a, b) => b.hot - a.hot) })),
       kpi(String(nSrc), '涵蓋來源', `台灣 ${nTw} 篇／國際 ${nGl} 篇`),
-      topInd ? kpi((indName[topInd.key] || topInd.key).replace('與', '與'), '最受關注的產業', `${topInd.total} 篇，占 ${pct(topInd.total, items.length)}%`, () => ev({ title: indName[topInd.key], items: topInd.items, watch: { type: 'industry', value: topInd.key, label: indName[topInd.key] }, onChange })) : null,
-      topEnt ? kpi(entMap[topEnt.key]?.name.split('／')[0] || topEnt.key, '最常被提到的公司', `${topEnt.total} 篇，${new Set(topEnt.items.map((x) => x.source)).size} 個來源`, () => ev({ title: entMap[topEnt.key]?.name, items: topEnt.items, watch: { type: 'entity', value: topEnt.key, label: entMap[topEnt.key]?.name } })) : null);
+      topInd ? kpi((indName[topInd.key] || topInd.key).replace('與', '與'), is24 ? '近 24 小時最受關注的產業' : '最受關注的產業', `${topInd.total} 篇，占 ${pct(topInd.total, items.length)}%`, () => ev({ title: indName[topInd.key], items: topInd.items, watch: { type: 'industry', value: topInd.key, label: indName[topInd.key] }, onChange })) : null,
+      topEnt ? kpi(entMap[topEnt.key]?.name.split('／')[0] || topEnt.key, is24 ? '近 24 小時最常被提到的公司' : '最常被提到的公司', `${topEnt.total} 篇，${new Set(topEnt.items.map((x) => x.source)).size} 個來源`, () => ev({ title: entMap[topEnt.key]?.name, items: topEnt.items, watch: { type: 'entity', value: topEnt.key, label: entMap[topEnt.key]?.name } })) : null);
     rootEl.append(row0);
+    if (!items.length) rootEl.append(el('p', { class: 'dcard dempty', text: '近 24 小時沒有新發布的文章（可能是來源暫時沒有更新）。可切換到「全部收錄」查看較早的報導。' }));
+
+    // ── 今日升溫／降溫（永遠以近 24 小時計算，與上方切換無關）──
+    rootEl.append(liftCard({ all, history, now, indName, entMap, ev, onChange }));
 
     // ── 我的追蹤 ──
-    rootEl.append(watchCard({ items, data, indName, entMap, store, now, ev, onChange }));
+    rootEl.append(watchCard({ items: all, data, indName, entMap, store, now, ev, onChange }));
 
     // ── 產業關注度 ──
     const grid = el('div', { class: 'cols' }); rootEl.append(grid);
     const max = Math.max(1, ...indRows.map((r) => r.total));
-    const c1 = card('c-7', '各產業的關注度', '條長＝文章數；右側「＋N」是近 24 小時發布的篇數。點一列看原始文章。', legend());
+    const c1 = card('c-7', `各產業的關注度（${scope}）`, `${is24 ? '條長＝近 24 小時的文章數' : '條長＝文章數；右側「＋N」是近 24 小時發布的篇數'}；箭頭＝昨日占比相對平常的變化（篇數太少的不顯示）。點一列看原始文章。`, legend());
     for (const r of indRows) {
       const tr = trendOf('industry', r.key);
-      const arrow = tr.daily && tr.daily.change != null ? el('span', { class: `chg ${tr.daily.change > 0 ? 'up' : tr.daily.change < 0 ? 'down' : ''}`, title: `昨日 ${tr.daily.last} 篇，前 ${tr.daily.n} 日均 ${tr.daily.avg} 篇`, text: `${tr.daily.change > 0 ? '▲' : tr.daily.change < 0 ? '▼' : '＝'}${Math.abs(tr.daily.change)}%` }) : null;
-      c1.append(el('button', { type: 'button', class: 'rowbtn', 'aria-label': `${indName[r.key]}：${r.total} 篇，台灣 ${r.tw}、國際 ${r.gl}。查看文章`, onclick: () => ev({ title: indName[r.key] || r.key, sub: `台灣 ${r.tw}、國際 ${r.gl}。`, items: r.items, watch: { type: 'industry', value: r.key, label: indName[r.key] }, onChange }) },
-        el('span', { class: 'nm', text: indName[r.key] || r.key }), bars(r.tw, r.gl, max), el('span', { class: 'num', text: String(r.total) }), el('span', { class: 'new', text: r.last24 ? `＋${r.last24}` : '' }), arrow));
+      const arrow = tr.daily && tr.daily.change != null && !smallSample(tr.daily) ? el('span', { class: `chg ${tr.daily.change > 0 ? 'up' : tr.daily.change < 0 ? 'down' : ''}`, title: `昨日占 ${pct1(tr.daily.lastShare)}%（${tr.daily.last}／${tr.daily.lastN} 篇），前 ${tr.daily.n} 日平均占 ${pct1(tr.daily.avgShare)}%`, text: `${tr.daily.change > 0 ? '▲' : tr.daily.change < 0 ? '▼' : '＝'}${Math.abs(tr.daily.change)}%` }) : el('span', { class: 'chg' }); // 沒有箭頭也要佔位，各列才對得齊
+      c1.append(el('button', { type: 'button', class: `rowbtn${is24 ? ' w24' : ''}`, 'aria-label': `${indName[r.key]}：${r.total} 篇，台灣 ${r.tw}、國際 ${r.gl}。查看文章`, onclick: () => ev({ title: indName[r.key] || r.key, sub: `台灣 ${r.tw}、國際 ${r.gl}。`, items: r.items, watch: { type: 'industry', value: r.key, label: indName[r.key] }, onChange }) },
+        el('span', { class: 'nm', text: indName[r.key] || r.key }), bars(r.tw, r.gl, max), el('span', { class: 'num', text: String(r.total) }), is24 ? null : el('span', { class: 'new', text: r.last24 ? `＋${r.last24}` : '' }), arrow));
     }
     const none = (data.taxonomy?.industries ?? []).filter((i) => !indRows.some((r) => r.key === i.id)).map((i) => i.name);
-    if (none.length) c1.append(el('p', { class: 'lede', style: 'margin-top:10px', text: `目前沒有相關文章：${none.join('、')}。（來源以軟體與科技為主，這些產業只有少量或沒有報導。）` }));
+    if (none.length) c1.append(el('p', { class: 'lede', style: 'margin-top:10px', text: `${is24 ? '近 24 小時' : '目前'}沒有相關文章：${none.join('、')}。（來源以軟體與科技為主，這些產業只有少量或沒有報導。）` }));
     grid.append(c1);
 
     // ── 台灣與國際落差 ──
     const gaps = D.gap(indRows, nTw, nGl, 8); const mg = Math.max(1, ...gaps.map((g) => Math.abs(g.gap)));
-    const c2 = card('c-5', '台灣與國際的注意力落差', '各自占自己總量的比例相減（百分點）。往右＝台灣更重視，往左＝國際更重視。');
+    const c2 = card('c-5', `台灣與國際的注意力落差（${scope}）`, '各自占自己總量的比例相減（百分點）。往右＝台灣更重視，往左＝國際更重視。');
     c2.append(el('div', { class: 'axis-cap' }, el('span', { text: '← 國際更重視' }), el('span', { text: '台灣更重視 →' })));
     for (const g of gaps) {
       const w = (Math.abs(g.gap) / mg) * 50, right = g.gap >= 0;
@@ -150,11 +176,11 @@
     // ── 公司排行 ──
     const grid2 = el('div', { class: 'cols' }); rootEl.append(grid2);
     const emax = Math.max(1, ...entRows.slice(0, 10).map((r) => r.total));
-    const c3 = card('c-6', '最常被提到的公司與產品', `公司字典（${data.taxonomy?.entities.length ?? 0} 個）涵蓋 ${pct(items.filter((x) => x.ents?.length).length, items.length)}% 的文章。點一列看原始文章。`, legend());
+    const c3 = card('c-6', `最常被提到的公司與產品（${scope}）`, `公司字典（${data.taxonomy?.entities.length ?? 0} 個）涵蓋 ${pct(items.filter((x) => x.ents?.length).length, items.length)}% 的文章。點一列看原始文章。`, legend());
     for (const r of entRows.slice(0, 10)) {
       const e = entMap[r.key];
-      c3.append(el('button', { type: 'button', class: 'rowbtn ent', 'aria-label': `${e?.name}：${r.total} 篇。查看文章`, onclick: () => ev({ title: e?.name || r.key, sub: `台灣 ${r.tw}、國際 ${r.gl}。`, items: r.items, watch: { type: 'entity', value: r.key, label: e?.name }, onChange }) },
-        el('span', { class: 'nm', text: e?.name || r.key }), bars(r.tw, r.gl, emax), el('span', { class: 'num', text: String(r.total) }), el('span', { class: 'new', text: r.last24 ? `＋${r.last24}` : '' }),
+      c3.append(el('button', { type: 'button', class: `rowbtn ent${is24 ? ' w24' : ''}`, 'aria-label': `${e?.name}：${r.total} 篇。查看文章`, onclick: () => ev({ title: e?.name || r.key, sub: `台灣 ${r.tw}、國際 ${r.gl}。`, items: r.items, watch: { type: 'entity', value: r.key, label: e?.name }, onChange }) },
+        el('span', { class: 'nm', text: e?.name || r.key }), bars(r.tw, r.gl, emax), el('span', { class: 'num', text: String(r.total) }), is24 ? null : el('span', { class: 'new', text: r.last24 ? `＋${r.last24}` : '' }),
         el('span', { class: 'dchips' }, ...(e?.industries || []).slice(0, 2).map((i) => el('span', { class: 'pill', text: (indName[i] || i).slice(0, 6) })))));
     }
     grid2.append(c3);
@@ -174,8 +200,9 @@
         el('li', {}, el('b', { text: '關注度：' }), '被收錄的文章篇數。一則文章可屬於最多 2 個產業，所以各產業加總會大於文章總數。'),
         el('li', {}, el('b', { text: '產業與公司：' }), '依標題比對 config/taxonomy.json 的字典，只看標題、粗分類，不是產業研究。'),
         el('li', {}, el('b', { text: '台灣／國際：' }), '依來源所在地區；台灣來源為 iThome、科技新報、TechOrange、INSIDE、iT邦幫忙、Medium 繁中標籤。'),
-        el('li', {}, el('b', { text: '資料窗：' }), '本站持續收錄各來源最近的熱門內容，不是全市場的完整資料。'),
-        el('li', {}, el('b', { text: '趨勢：' }), '以每日累積的歷史計算。上線當天（存量）與今天（只過一部分）不納入；完整日 ≥ 3 天才顯示「昨日 vs 日均」，≥ 14 天才顯示週成長。'),
+        el('li', {}, el('b', { text: '資料窗：' }), '本站持續收錄各來源最近的熱門內容，不是全市場的完整資料。預設只看近 24 小時發布的文章（依發布時間，沒有發布時間的依首次收錄時間）；切到「全部收錄」會包含約 3 天內的報導。'),
+        el('li', {}, el('b', { text: '今日升溫／降溫：' }), `近 24 小時的占比 ÷ 平常的占比。平常＝每日歷史中昨天以前最多 ${D.LIFT_DEFAULTS.baseDays} 個完整日的合併占比（昨天和近 24 小時大部分重疊，所以不算進去）。升溫需近 24 小時至少 ${D.LIFT_DEFAULTS.minCount} 篇；降溫需平常預期至少 ${D.LIFT_DEFAULTS.minCount} 篇。近 24 小時以發布時間計、歷史以首次收錄日計，是近似比較。`),
+        el('li', {}, el('b', { text: '趨勢：' }), '比的是「占當天總篇數的比例」，不是篇數：每天收錄的總量起伏很大，直接比篇數會把「整體量變多」誤當成升溫。上線當天（存量）與今天（只過一部分）不納入；完整日 ≥ 3 天才顯示「昨日 vs 平常」，≥ 14 天才顯示週變化。'),
         el('li', {}, el('b', { text: '來源構成：' }), `社群 ${comm}、媒體 ${items.filter((x) => x.stype === 'media').length}、開源專案 ${items.filter((x) => x.stype === 'repo').length}、官方 ${items.filter((x) => x.stype === 'official').length}（篇）。`))));
     return rootEl;
   }
@@ -282,22 +309,57 @@
     return c;
   }
 
+  // ───────── 今日升溫／降溫 ─────────
+  function liftCard({ all, history, now, indName, entMap, ev, onChange }) {
+    const L = D.lift(all, history, now);
+    const c = card('full lift', '今日升溫', '近 24 小時的占比相對「平常」的倍數，比篇數更能看出今天哪裡不一樣（篇數最多的產業每天都排第一）。點一列看原始文章。');
+    if (!L.ready) {
+      const need = D.LIFT_DEFAULTS;
+      c.append(el('div', { class: 'accum' }, el('strong', { text: '還不能比較' }),
+        el('p', { text: L.n < need.minWindow ? `近 24 小時只有 ${L.n} 篇，少於 ${need.minWindow} 篇，比例不穩定。` : `「平常」需要至少 ${need.minBaseDays} 個完整日的歷史（不含昨天），目前有 ${L.baseDays.length} 天。` })));
+      return c;
+    }
+    const nameOf = (r) => (r.kind === 'industry' ? indName[r.key] || r.key : r.kind === 'entity' ? entMap[r.key]?.name || r.key : r.key);
+    const watchOf = (r) => ({ type: r.kind, value: r.key, label: nameOf(r) });
+    const base = `平常＝${L.baseDays[0].slice(5).replace('-', '/')}～${L.baseDays[L.baseDays.length - 1].slice(5).replace('-', '/')}（${L.baseDays.length} 天、${L.baseN} 篇）`;
+    const maxLift = Math.max(2, ...L.up.map((r) => r.lift));
+    const row = (r, up) => el('button', { type: 'button', class: `liftrow ${up ? 'up' : 'down'}`,
+      'aria-label': `${KIND_LABEL[r.kind]} ${nameOf(r)}：近 24 小時 ${r.cur} 篇，占 ${pct1(r.curShare)}%；平常占 ${pct1(r.baseShare)}%；${r.fresh ? '平常沒有出現' : `${r.lift} 倍`}。查看文章`,
+      onclick: () => ev({ title: `${nameOf(r)}（${KIND_LABEL[r.kind]}）`, sub: `近 24 小時 ${r.cur} 篇、占 ${pct1(r.curShare)}%；平常占 ${pct1(r.baseShare)}%（依每日歷史統計，${L.baseDays.length} 天）。`, items: r.items, watch: watchOf(r), onChange }) },
+      el('span', { class: 'pill', text: KIND_LABEL[r.kind] }),
+      el('span', { class: 'nm', text: nameOf(r) }),
+      up ? el('span', { class: 'ltrack', 'aria-hidden': 'true' }, el('i', { style: `width:${Math.min(100, (r.lift / maxLift) * 100)}%` })) : el('span', { class: 'ltrack', 'aria-hidden': 'true' }, el('i', { class: 'dn', style: `width:${Math.max(4, r.lift * 100)}%` })),
+      el('span', { class: 'lnum', text: r.fresh ? '新出現' : `${r.lift.toFixed(1)} 倍` }),
+      el('span', { class: 'ldet', text: up ? `${r.cur} 篇・${pct1(r.curShare)}%（平常 ${pct1(r.baseShare)}%）` : `${r.cur} 篇（平常約 ${Math.round(r.expected)} 篇）・${pct1(r.curShare)}%／${pct1(r.baseShare)}%` }));
+    const cols = el('div', { class: 'liftcols' });
+    const upBox = el('div', {}, el('h3', { text: '▲ 比平常多' }));
+    if (L.up.length) upBox.append(...L.up.map((r) => row(r, true))); else upBox.append(el('p', { class: 'dempty', text: `今天沒有明顯升溫的項目（門檻：至少 ${D.LIFT_DEFAULTS.minCount} 篇、${D.LIFT_DEFAULTS.up} 倍以上）。` }));
+    const dnBox = el('div', {}, el('h3', { text: '▼ 比平常少' }));
+    if (L.down.length) dnBox.append(...L.down.map((r) => row(r, false))); else dnBox.append(el('p', { class: 'dempty', text: '今天沒有明顯降溫的項目。' }));
+    cols.append(upBox, dnBox);
+    c.append(cols, el('p', { class: 'lede', style: 'margin-top:8px', text: `近 24 小時 ${L.n} 篇；${base}。篇數少的項目倍數容易跳動，請搭配篇數一起看。` }));
+    return c;
+  }
+
   // ───────── 趨勢 ─────────
   function trendCard({ history, indRows, indName, now, trendOf, days, ev, onChange }) {
-    const c = card('full', '趨勢與動能', '看哪個產業比平常更受關注（昨日 vs 之前日均）。');
+    const c = card('full', '趨勢與動能', '看哪個產業比平常更受關注：比的是占當天總篇數的比例（昨日 vs 之前幾天），已扣掉每天總量起伏的影響。');
     if (days < 3) {
       const start = history?.startedAt ? D.taipeiDay(Date.parse(history.startedAt)) : D.taipeiDay(now);
       c.append(el('div', { class: 'accum' }, el('strong', { text: `歷史累積中：目前有 ${days} 個完整日` }),
-        el('p', { text: `本站從 ${start} 開始每天累積。上線當天（存量）與今天（只過一部分）不納入計算，所以還不能比較。滿 3 個完整日會顯示「昨日 vs 日均」，滿 14 個完整日會顯示週成長。` })));
+        el('p', { text: `本站從 ${start} 開始每天累積。上線當天（存量）與今天（只過一部分）不納入計算，所以還不能比較。滿 3 個完整日會顯示「昨日 vs 平常」，滿 14 個完整日會顯示週變化。` })));
       return c;
     }
-    const tbl = el('table', {}, el('thead', {}, el('tr', {}, ...['產業', '近期走勢', '昨日', '前日均', '變化', '週成長'].map((h) => el('th', { scope: 'col', text: h })))), el('tbody'));
+    const tbl = el('table', {}, el('thead', {}, el('tr', {}, ...['產業', '近期占比走勢', '昨日（篇數）', '昨日占比', '平常占比', '占比變化', '週變化'].map((h) => el('th', { scope: 'col', text: h })))), el('tbody'));
     for (const r of indRows.slice(0, 10)) {
       const t = trendOf('industry', r.key);
-      tbl.tBodies[0].append(el('tr', {}, el('td', { text: indName[r.key] }), el('td', {}, spark(t.series)), el('td', { class: 'n', text: t.daily ? String(t.daily.last) : '—' }), el('td', { class: 'n', text: t.daily ? String(t.daily.avg) : '—' }),
-        el('td', { class: 'n', text: t.daily?.change != null ? `${t.daily.change > 0 ? '+' : ''}${t.daily.change}%` : '—' }), el('td', { class: 'n', text: t.weekly?.change != null ? `${t.weekly.change > 0 ? '+' : ''}${t.weekly.change}%` : (days >= 14 ? '—' : '需 14 天') })));
+      const d = t.daily;
+      tbl.tBodies[0].append(el('tr', {}, el('td', { text: indName[r.key] }), el('td', {}, spark(t.series)), el('td', { class: 'n', text: d ? `${d.last}／${d.lastN}` : '—' }),
+        el('td', { class: 'n', text: d ? `${pct1(d.lastShare)}%` : '—' }), el('td', { class: 'n', title: d ? `前 ${d.n} 日合併計算；日均 ${d.avg} 篇` : null, text: d ? `${pct1(d.avgShare)}%` : '—' }),
+        d && smallSample(d) ? el('td', { class: 'n weak', title: `篇數少（昨日 ${d.last} 篇、平常日均 ${d.avg} 篇），僅供參考`, text: d.change != null ? `${signed(d.change)}%*` : '—' })
+          : el('td', { class: `n ${d?.change > 0 ? 'up' : d?.change < 0 ? 'down' : ''}`, text: d?.change != null ? `${signed(d.change)}%` : '—' }), el('td', { class: 'n', text: t.weekly?.change != null ? `${signed(t.weekly.change)}%` : (days >= 14 ? '—' : '需 14 天') })));
     }
-    c.append(el('div', { class: 'tbl-wrap' }, tbl), el('p', { class: 'lede', style: 'margin-top:8px', text: `依 ${days} 個完整日計算；樣本天數越少越不穩定，請謹慎解讀。` }));
+    c.append(el('div', { class: 'tbl-wrap' }, tbl), el('p', { class: 'lede', style: 'margin-top:8px', text: `依 ${days} 個完整日計算；占比變化＝(昨日占比 − 平常占比) ÷ 平常占比；標 * 的是篇數少（昨日與平常日均都不到 ${D.LIFT_DEFAULTS.minCount} 篇），僅供參考。樣本天數越少越不穩定，請謹慎解讀。` }));
     return c;
   }
 

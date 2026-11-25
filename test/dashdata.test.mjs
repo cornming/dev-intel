@@ -7,7 +7,7 @@ const load = (f, name) => { const sb = { self: {} }; vm.runInNewContext(readFile
 // vm 內建立的物件／陣列原型不同，deepStrictEqual 會誤判：純資料函式的結果一律複製到本環境再比對
 const plain = (x) => JSON.parse(JSON.stringify(x ?? null));
 const wrap = (api, names) => Object.fromEntries(Object.entries(api).map(([k, v]) => [k, names.includes(k) ? (...a) => plain(v(...a)) : v]));
-const D = wrap(load('dashdata.js', 'DevDashData'), ['rank', 'gap', 'completeDays', 'trend']);
+const D = wrap(load('dashdata.js', 'DevDashData'), ['rank', 'gap', 'completeDays', 'trend', 'lift', 'baselineDays', 'inWindow']);
 const W = wrap(load('watchlist.js', 'DevWatch'), ['normalize', 'summarize', 'parseImport']);
 const NOW = Date.parse('2026-11-18T12:00:00Z');
 const it = (id, o = {}) => ({ id, title: `標題 ${id}`, region: 'global', tags: [], inds: [], ents: [], hot: 0.5, time: '2026-11-18T06:00:00Z', ...o });
@@ -50,20 +50,36 @@ test('trend：完整日不足 3 天時不給動能（避免用太少的資料下
   assert.equal(t.series.length, 2);
 });
 
-test('trend：daily＝最近一天 vs 之前日均；weekly 需要 14 個完整日', () => {
+test('trend：daily＝最近一天的占比 vs 之前的合併占比；weekly 需要 14 個完整日', () => {
   const days = { '2026-11-01': 999 };                                              // 第一天（存量，排除）
   for (let i = 2; i <= 16; i++) days[`2026-11-${String(i).padStart(2, '0')}`] = i <= 9 ? 10 : 20;   // 11/2–11/9 每天 10，11/10–11/16 每天 20
-  const h = hist(days, '2026-11-01T01:00:00Z');
+  const h = hist(days, '2026-11-01T01:00:00Z');                                    // hist：每天 ai 都占 100%
   const t = D.trend(h, 'industry', 'ai', Date.parse('2026-11-17T12:00:00Z'));       // 今天 11/17（排除）；完整日 11/2–11/16 共 15 天
   assert.equal(t.days, 15);
-  assert.equal(t.daily.last, 20); assert.equal(t.daily.n, 6); assert.equal(t.daily.avg, 20);   // 前 6 天（11/10–11/15）都是 20
-  assert.equal(t.daily.change, 0);
-  // 最近 7 個完整日（11/10–11/16）每天 20＝140；前 7 天（11/3–11/9）每天 10＝70；成長 +100%
-  assert.equal(t.weekly.cur, 140); assert.equal(t.weekly.before, 70); assert.equal(t.weekly.change, 100);
-  assert.equal(t.series.length, 14);
+  assert.equal(t.daily.last, 20); assert.equal(t.daily.lastN, 20); assert.equal(t.daily.n, 6); assert.equal(t.daily.avg, 20);
+  assert.equal(t.daily.lastShare, 1); assert.equal(t.daily.avgShare, 1); assert.equal(t.daily.change, 0);
+  // 篇數翻倍（70 → 140），但占比一樣是 100%：週變化是 0，不是 +100%
+  assert.equal(t.weekly.cur, 140); assert.equal(t.weekly.before, 70); assert.equal(t.weekly.change, 0);
+  assert.equal(t.series.length, 14); assert.equal(t.series[0].share, 1);
+  // 總篇數（kind 'total'）仍然比篇數
+  const tt = D.trend(h, 'total', null, Date.parse('2026-11-17T12:00:00Z'));
+  assert.equal(tt.weekly.change, 100); assert.equal(tt.daily.change, 0);
+});
+
+// 每天總量 n 與 ai 篇數分開指定：{ day: [n, ai] }
+const hist2 = (days, startedAt = '2026-11-10T01:00:00Z') => ({ startedAt, days: Object.fromEntries(Object.entries(days).map(([k, [n, ai, semi = 0]]) => [k, { n, tw: 0, gl: n, topics: {}, inds: { ai, semi }, ents: {}, stype: {} }])) });
+
+test('trend：總量變多時，篇數變多不等於升溫（看占比）', () => {
+  // 前幾天每天 100 篇、AI 40 篇（40%）；昨天 200 篇、AI 84 篇（42%）。篇數 +110%，但占比只 +5%
+  const h = hist2({ '2026-11-10': [400, 150], '2026-11-11': [100, 40], '2026-11-12': [100, 40], '2026-11-13': [100, 40], '2026-11-14': [200, 84] });
+  const t = D.trend(h, 'industry', 'ai', NOW);
+  assert.equal(t.daily.last, 84); assert.equal(t.daily.avg, 40);
+  assert.equal(t.daily.lastShare, 0.42); assert.equal(t.daily.avgShare, 0.4);
+  assert.equal(t.daily.change, 5);
 });
 
 test('trend：前期為 0 時不算百分比（避免除以零與誇大）', () => {
+  // 前期 n＝0（沒有資料）時，占比無法計算
   const h = hist({ '2026-11-10': 5, '2026-11-11': 0, '2026-11-12': 0, '2026-11-13': 0, '2026-11-14': 7 });
   const t = D.trend(h, 'industry', 'ai', NOW);
   assert.equal(t.daily.change, null);
@@ -73,6 +89,50 @@ test('trend：空歷史或壞資料不會丟例外', () => {
   assert.deepEqual(D.completeDays(null, NOW), []);
   assert.equal(D.trend({ days: {} }, 'industry', 'ai', NOW).days, 0);
   assert.equal(D.trend({ startedAt: '2026-11-18T00:00:00Z', days: { '2026-11-18': { n: 1 } } }, 'industry', 'x', NOW).series.length, 0);
+});
+
+// ── 今日升溫／降溫 ──
+// 近 24 小時的文章：n 篇，其中 k 篇屬於 key
+const winItems = (spec) => { const out = []; let i = 0; for (const [n, o] of spec) for (let j = 0; j < n; j++) out.push(it(`w${i++}`, { time: '2026-11-18T08:00:00Z', ...o })); return out; };
+// 基準 4 天（11/14–11/17；11/17＝昨天，不算基準），每天 100 篇：ai 40、semi 10、sec 10、google 12
+const baseHist = () => ({ startedAt: '2026-11-13T01:00:00Z', days: Object.fromEntries(['2026-11-13', '2026-11-14', '2026-11-15', '2026-11-16', '2026-11-17'].map((d) => [d, { n: 100, tw: 0, gl: 100, topics: { AI: 40, 其他: 30 }, inds: { ai: 40, semi: 10, sec: 10 }, ents: { google: 12 }, stype: {} }])) });
+
+test('baselineDays：排除第一天、今天，也排除昨天（和近 24 小時重疊）', () => {
+  assert.deepEqual(D.baselineDays(baseHist(), NOW), ['2026-11-14', '2026-11-15', '2026-11-16']);
+});
+
+test('lift：比占比倍數，不比篇數——篇數最多的不一定升溫', () => {
+  // 近 24 小時 50 篇：ai 20（40%，與平常相同）、semi 15（30%，平常 10% → 3 倍）、sec 1（2%，平常 10%）、其他 14
+  const items = winItems([[20, { inds: ['ai'], tags: ['AI'] }], [15, { inds: ['semi'] }], [1, { inds: ['sec'] }], [14, {}]]);
+  const L = D.lift(items, baseHist(), NOW);
+  assert.equal(L.ready, true); assert.equal(L.n, 50); assert.equal(L.baseN, 300);
+  assert.equal(L.up[0].key, 'semi'); assert.equal(L.up[0].lift, 3); assert.equal(L.up[0].cur, 15); assert.equal(L.up[0].items.length, 15);
+  assert.ok(!L.up.some((r) => r.key === 'ai'));                                    // AI 篇數最多，但占比和平常一樣
+  assert.ok(!L.up.some((r) => r.key === '其他'));                                   // 「其他」不列入
+  const sec = L.down.find((r) => r.key === 'sec'); assert.ok(sec); assert.equal(sec.lift, 0.2); assert.equal(sec.expected, 5);
+  const g = L.down.find((r) => r.key === 'google'); assert.ok(g); assert.equal(g.cur, 0); assert.equal(g.lift, 0); assert.equal(g.expected, 6);   // 平常有、今天一篇都沒有（平常 12% × 50＝預期 6 篇）
+});
+
+test('lift：小樣本門檻——升溫需 ≥ 5 篇；平常沒有的標為新出現', () => {
+  const items = winItems([[4, { inds: ['semi'] }], [6, { ents: ['nvidia'] }], [30, {}]]);
+  const L = D.lift(items, baseHist(), NOW);
+  assert.ok(!L.up.some((r) => r.key === 'semi'));                                  // 4 篇：未達門檻（雖然占比也較高）
+  const nv = L.up.find((r) => r.key === 'nvidia'); assert.ok(nv); assert.equal(nv.fresh, true); assert.equal(nv.baseShare, 0);
+});
+
+test('lift：歷史不足或近 24 小時篇數太少時不比較；24 小時以外的文章不算', () => {
+  const short = { startedAt: '2026-11-15T01:00:00Z', days: { '2026-11-15': { n: 100 }, '2026-11-16': { n: 100, inds: {} }, '2026-11-17': { n: 100, inds: {} } } };
+  assert.equal(D.lift(winItems([[40, {}]]), short, NOW).ready, false);
+  assert.equal(D.lift(winItems([[10, {}]]), baseHist(), NOW).ready, false);
+  assert.equal(D.lift(winItems([[40, {}]]), null, NOW).ready, false);
+  const old = winItems([[40, { inds: ['semi'], time: '2026-11-16T00:00:00Z' }], [40, {}]]);
+  const L = D.lift(old, baseHist(), NOW); assert.equal(L.n, 40); assert.ok(!L.up.length);
+});
+
+test('inWindow：24h 只留近 24 小時發布的；all 全部保留', () => {
+  const items = [it('a'), it('b', { time: '2026-11-16T00:00:00Z' }), it('c', { time: undefined, firstSeen: '2026-11-18T10:00:00Z' })];
+  assert.deepEqual(D.inWindow(items, '24h', NOW).map((x) => x.id), ['a', 'c']);
+  assert.equal(D.inWindow(items, 'all', NOW).length, 3);
 });
 
 // ── 追蹤清單 ──
